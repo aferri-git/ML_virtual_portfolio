@@ -1,0 +1,27 @@
+# Data and numerics
+pandas
+numpy
+scipy
+pyarrow
+duckdb
+
+# Data sources
+yfinance
+fredapi
+
+# Modelling and statistics
+scikit-learn
+statsmodels
+
+# Data validation and tests
+pandera
+pytest
+
+# Notebooks and plots
+ipykernel
+matplotlib
+
+# Added in Milestone C
+# fastapi
+# uvicorn
+# pydantic

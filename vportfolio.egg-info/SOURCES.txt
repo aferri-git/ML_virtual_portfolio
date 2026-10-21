@@ -1,0 +1,6 @@
+README.md
+setup.py
+vportfolio.egg-info/PKG-INFO
+vportfolio.egg-info/SOURCES.txt
+vportfolio.egg-info/dependency_links.txt
+vportfolio.egg-info/top_level.txt
