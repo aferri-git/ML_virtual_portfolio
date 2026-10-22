@@ -1,4 +1,4 @@
-# Pre-registration (written 2026-10-21, before any backtest)
+# Pre-registration (written 21-10-2026, before any backtest)
 
 ## Hypothesis
 A systematic multi-asset allocator using denoised, cluster-based allocation (NCO, HRP)

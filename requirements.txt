@@ -4,6 +4,7 @@ numpy
 scipy
 pyarrow
 duckdb
+notebook
 
 # Data sources
 yfinance
