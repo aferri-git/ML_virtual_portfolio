@@ -9,3 +9,5 @@ The workflow will be as follows: Ingestion -> Cleaning -> Features -> Models -> 
 I intend to use free resources to build this project, and run the model locally
 
 I will use a universe of ETFs due to data reliability and availability considerations
+
+
