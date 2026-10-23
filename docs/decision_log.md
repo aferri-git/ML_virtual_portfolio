@@ -8,3 +8,9 @@
     x SHY is short term treasury ETF; after checking the years in which 0 returns are concentrated I believe it follows US rates change patterns and its low duration
     x UUP dates revolve around xmas
     x for HYG a crosscheck of ishares and nasdq data shows similar price behaviour (https://www.ishares.com/us/products/239565/ishares-iboxx-high-yield-corporate-bond-etf https://www.nasdaq.com/market-activity/etf/hyg/historical?page=1&rows_per_page=10&timeline=y1)
+
+# 23-10-2026
+- Presence of extreme returns
+    x UUP displayed a strange 2 days behaviour which was cross-checked with DXY
+- SHY, IEF, AGG and TIP show 10bp of trading costs based on volume estimates
+    x In this case I will over-write the rule and for simplicity reduce the cost to 2bps. I will reflect this in pre_registration
