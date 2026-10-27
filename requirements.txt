@@ -22,7 +22,7 @@ pytest
 ipykernel
 matplotlib
 
-# Added in Milestone C
+# Added later
 # fastapi
 # uvicorn
 # pydantic
