@@ -84,3 +84,10 @@ or earlier), covering the main asset classes and their characteristics:
 ## Known issues
 - Early years have a narrower universe 
 - EMLC starts in 2010 and joins the universe in 2012
+
+## Amendments
+- 2026-10-23, before any backtest: trading costs for large Treasury, IG and aggregate
+  bond ETFs (SHY, IEF, TLT, AGG, TIP, LQD) set to 2 bp, as dollar volume understated
+  their liquidity. See decision_log.md (23-10-2026)
+- 2026-10-28: inverse volatility added as a diagnostic baseline after the equal-weight
+  and 60/40 results were seen; success criteria unchanged. See decision_log.md (28-10-2026)
