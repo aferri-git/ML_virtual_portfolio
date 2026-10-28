@@ -1,0 +1,4 @@
+date,name,allocator,settings,role,ann_return,sharpe,returns_file
+2026-10-28,sixty_forty,sixty_forty,"cap=None, lookback=1",benchmark,0.08240359593466007,0.6496391506960795,results/backtests/sixty_forty.parquet
+2026-10-28,equal_weights,equal_weights,"cap=0.2, lookback=504",benchmark,0.05739589890755914,0.49238111191117284,results/backtests/equal_weights.parquet
+2026-10-28,risk_weighted,risk_weighted,"cap=0.2, lookback=504",diagnostic,0.04175518803244049,0.587723533631634,results/backtests/risk_weighted.parquet
