@@ -23,3 +23,4 @@ RESEARCH_START, RESEARCH_END = "2005-01-01", "2021-12-31"
 
 RESULTS = ROOT / "results"
 BACKTEST = RESULTS / "backtest"
+TRIALS_LOG = RESULTS / "trials_log.csv"
