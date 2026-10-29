@@ -9,7 +9,7 @@ import numpy as np
 from vportfolio.engine import lookback_window, apply_cap, new_target, trading_costs, holding_nav, drift, backtest_engine
 from vportfolio.params import LOOKBACK
 
-#lookback_window
+# lookback_window
 def test_lookback_window():
     dates = pd.bdate_range("2020-1-1", periods=600) # a bit more than 504 days
     fake_returns = pd.DataFrame(0.001, index=dates, columns=["A", "B", "C", "D", "E"]) # constant returns
