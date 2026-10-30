@@ -11,3 +11,6 @@ I intend to use free resources to build this project. It will be developed local
 The dashboard will show the portfolio's performance against its benchmarks, its current allocation and the research results behind it
 
 I will use a universe of ETFs due to data reliability and availability considerations
+
+
+© 2026 Antonio Ferri. All rights reserved.

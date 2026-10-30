@@ -1,4 +1,4 @@
-date,name,allocator,settings,role,ann_return,sharpe,turnover,max_drawdown,returns_file
-2026-10-28,sixty_forty,sixty_forty,"cap=None, lookback=1",benchmark,0.08240359593466007,0.6496391506960795,0.021518488410150218,-0.3569241142588365,results/backtests/sixty_forty.parquet
-2026-10-28,equal_weights,equal_weights,"cap=0.2, lookback=504",benchmark,0.05739589890755914,0.49238111191117284,0.0375657385928342,-0.33717803037958327,results/backtests/equal_weights.parquet
-2026-10-28,risk_weighted,risk_weighted,"cap=0.2, lookback=504",diagnostic,0.04175518803244049,0.587723533631634,0.0375657385928342,-0.33717803037958327,results/backtests/risk_weighted.parquet
+date,name,allocator,settings,role,ann_return,sharpe,turnover,max_drawdown,returns_file,ann_vol,avg_turnover
+2026-10-29,sixty_forty,sixty_forty,"cap=None, lookback=1",benchmark,0.08240359593466007,0.6496391506960795,,-0.3569241142588365,/home/antonio/code/aferri-git/ML_virtual_portfolio/results/backtest/sixty_forty_returns.parquet,0.11433468950215774,0.021518488410150218
+2026-10-29,equal_weights,equal_weights,"cap=0.2, lookback=504",benchmark,0.05739589890755914,0.49238111191117284,,-0.33717803037958327,/home/antonio/code/aferri-git/ML_virtual_portfolio/results/backtest/equal_weights_returns.parquet,0.10034762865050545,0.0375657385928342
+2026-10-29,risk_weighted,risk_weighted,"cap=0.2, lookback=504",diagnostic,0.04175518803244049,0.587723533631634,,-0.194148956778745,/home/antonio/code/aferri-git/ML_virtual_portfolio/results/backtest/risk_weighted_returns.parquet,0.052477778359654656,0.03457244242482451
