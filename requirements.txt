@@ -21,6 +21,7 @@ pytest
 # Notebooks and plots
 ipykernel
 matplotlib
+seaborn
 
 # Added later
 # fastapi
