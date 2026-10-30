@@ -24,3 +24,9 @@ RESEARCH_START, RESEARCH_END = "2005-01-01", "2021-12-31"
 RESULTS = ROOT / "results"
 BACKTEST = RESULTS / "backtest"
 TRIALS_LOG = RESULTS / "trials_log.csv"
+
+# Introduced for data loading
+RAW_FILE = RAW / "yahoo_prices_2026-10-23.parquet"
+
+# Introduced for testing of data loading
+DATA_KEYS = (["close", "open", "returns", "eligible", "rebal_dates", "cost_bp", "rf_daily"])
