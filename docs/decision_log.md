@@ -18,3 +18,9 @@
 # 28-10-2026
 - After seeing the results, I realised that between equal weights and the more complex models described in de Prado's book, there might be added value in risk-weighting; I want to make sure to isolate this in diagnostics
 - In terms of the 60/40 vs Equal Allocation results, they make sense in theory. US Equities, large caps in particular, has done remarkably better than many other asset classes or regional exposures; the performance gap is also very much regime-dependent rather than constant with an inflection point in late 2013 early 2014
+
+# 30-10-2026
+- Denoising: constant residual eigenvalue method. Targeted shrinkage not tested: it adds a tuning parameter, and with it extra trials
+- Test allocator: long-only minimum variance, raw vs denoised covariance, as the allocator most sensitive to covariance noise so any effect of denoising shows most clearly
+- No detoning for minimum variance (market risk must stay in the covariance); detoning kept for clustering in NCO
+- All decided before any denoising results
