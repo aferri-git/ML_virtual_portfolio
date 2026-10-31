@@ -1,8 +1,6 @@
 ## Test functions for pipelines.py
     # Tests requirements are within the assert statements of each function
 
-## X TESTS ##
-
 import pandas as pd
 import numpy as np
 from vportfolio import allocators, pipelines

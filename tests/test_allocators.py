@@ -1,7 +1,5 @@
 # Test functions for allocators.py
     # All allocators need to yield a total % allocation of 100$
-    
-## 3 TESTS ##
 
 # Imports
 import pandas as pd

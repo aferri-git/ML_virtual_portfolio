@@ -8,7 +8,7 @@ from vportfolio import allocators, engine,  metrics, trials
 from vportfolio.params import CAP, LOOKBACK, BACKTEST, TRIALS_LOG
 
 # a pipeline to execute a trial on each new allocator
-# will save the return results in a parquet file and update trials log with relevant information for the trial for future evaluation 
+## will save the return results in a parquet file and update trials log with relevant information for the trial for future evaluation 
 def trial_pipeline(name, allocator, role, data, cap=CAP, lookback=LOOKBACK, folder=BACKTEST, trials_log = TRIALS_LOG):
     # run the engine
     result = engine.backtest_engine(allocator, 
