@@ -47,7 +47,7 @@ def fit_sigma2(eigenvals, q, bandwidth = 0.25):
     return candidates[np.argmin(gaps)]
 
 # Apply all the denoising steps based on the ceiling method
-# will return a dataframe with the new denoised matrix
+    # will return a dataframe with the new denoised matrix
 def denoise_with_ceiling(corr, ceiling):
     # calculate eigenvals and eigenvect
     eigenvals, eigenvec = np.linalg.eigh(corr)
@@ -87,3 +87,14 @@ def denoise_corr(corr, t, bandwidth = 0.25):
     sigma2 = fit_sigma2(eigenvals, q, bandwidth = bandwidth)
     ceiling = sigma2 * (1+1/np.sqrt(q))**2
     return denoise_with_ceiling(corr, ceiling)
+
+
+# Obtain the covariance matrix from the denoised correlation matrix and the volatilities of the returns
+    # will return a dataframe with the denoised covariance matrix
+def denoised_cov ( window):
+    t = window.shape[0] # number of days in lookback window
+    vols = window.std() # volatilities from the returns
+    corr = window.corr() # raw correlation
+    denoised = denoise_corr(corr, t) # denoise the correlation
+    cov = denoised * np.outer(vols, vols) # rebuild the covariance
+    return cov

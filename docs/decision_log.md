@@ -24,3 +24,8 @@
 - Test allocator: long-only minimum variance, raw vs denoised covariance, as the allocator most sensitive to covariance noise so any effect of denoising shows most clearly
 - No detoning for minimum variance (market risk must stay in the covariance); detoning kept for clustering in NCO
 - All decided before any denoising results
+
+## 02-11-2026
+- Fitted σ² retained as declared. Diagnostic: across every year-end window 2005–2021
+  (11–21 ETFs) the fit sits at the upper bound σ² = 1.0, so the fitted ceiling equals
+  the unfitted one for this universe.

@@ -3,7 +3,7 @@
 # Imports
 import pandas as pd
 import numpy as np
-from vportfolio.denoising import denoise_with_ceiling, fit_sigma2, kde, mp_pdf, denoise_corr
+from vportfolio.denoising import denoise_with_ceiling, fit_sigma2, kde, mp_pdf, denoise_corr, denoised_cov
 
 # small helper function to calculate the condition number
 def cond(m):
@@ -95,7 +95,6 @@ def test_denoise_corr():
     assert np.allclose(result, result.T) # symmetric
     assert (np.linalg.eigvalsh(result) > 0).all() # positive eigenvalues
     assert result.index.equals(random_corr.index) # same labels
-
     # 2. known answer:
     m = np.eye(6) # 6 assets, no correlation yet (1s on the diagonal, 0s elsewhere)
     m[:3, :3] = 0.8 # block 1: assets 0–2 move together (correlation 0.8)
@@ -110,3 +109,18 @@ def test_denoise_corr():
         ev = np.linalg.eigvalsh(m)
         return ev.max() / ev.min()
     assert cond(denoise_corr(random_corr, t=500)) <= cond(random_corr)
+
+# denoise_cov
+def test_denoised_cov():
+    rng = np.random.default_rng(0) # fix the seed
+    window_test = pd.DataFrame(rng.normal(size=(500, 6)) * [0.01, 0.02, 0.03, 0.01, 0.02, 0.03]) # fake 500 days returns for 6 ETFs with normal distribution
+    # then multiplied by a series of numbers to apply a different volatility to each of the 6 ETFs
+    result = denoised_cov(window_test)
+    # 1. always true: a valid covariance matrix
+    assert np.allclose(result, result.T) # symmetric
+    assert (np.linalg.eigvalsh(result) > 0).all() # positive eigenvalues
+    # 2. known answer: volatilities unchanged (diagonal = raw variances)
+    assert np.allclose(np.diag(result), np.diag(window_test.cov()))
+    # 3. inputs matter: the correlations inside it are the denoised ones
+    vols = window_test.std()
+    assert np.allclose(result / np.outer(vols, vols), denoise_corr(window_test.corr(), 500))
