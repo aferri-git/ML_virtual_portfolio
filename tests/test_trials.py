@@ -1,7 +1,5 @@
 ## Test functions from trials.py
 
-## 3 Tests##
-
 # Imports
 import numpy as np
 import pandas as pd

@@ -1,8 +1,6 @@
 ## Test functions for engine.py
     # Tests requirements are within the assert statements of each function
 
-## 7 TESTS ##
-
 # Imports
 import pandas as pd
 import numpy as np

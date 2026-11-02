@@ -1,17 +1,17 @@
-## Project-wide universal variables
+# Project-wide universal variables
 
-## Imports
+# Imports
 from pathlib import Path
 
-## Paths
-# set project root by finding it through test file's own location
+# Paths
+## set project root by finding it through test file's own location
 ROOT = Path(__file__).resolve().parents[1]
 
 DATA = ROOT / "data"
 RAW = DATA / "raw"
 PROCESSED = DATA / "processed"
 
-## Parameters
+# Parameters
 UNIVERSE = ["SPY", "QQQ", "IWM", "EFA", "EEM", "TLT", "IEF", "SHY", "TIP",
             "LQD", "HYG", "EMB", "EMLC", "GLD", "DBC", "XLE", "VNQ",
             "UUP", "FXY", "FXA", "FXF"]
