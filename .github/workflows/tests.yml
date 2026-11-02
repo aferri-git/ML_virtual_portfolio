@@ -1,0 +1,32 @@
+# File to run tests on github actions
+# This will ensure that all test are run on every push and pull request to the main branch
+
+name: tests # the label shown on github actions
+
+on: # when it runs
+  pull_request: # every pull open or update
+    branches: [main] # to main
+  push: # every push
+    branches: [main]
+
+jobs: # the job called (test)
+  test:
+    runs-on: ubuntu-latest # The environment to run the test on. GitrHub will start a new linux machine for each run. It will prove that the project works from scratch
+    steps: # what the machine does in order
+      - name: Get the code
+        uses: actions/checkout@v4 # copies the repo's code on the machine
+
+      - name: Set up Python
+        uses: actions/setup-python@v5 # installs Python on the machine
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install the project
+        run: make install # runs install command from makefile
+
+      - name: Run the tests
+        run: make test # runs test command from makefile
+
+# data folder is gitignored, which is why skipif have been built in load_data.py
+# the important part is that all fake data tests will run normally
