@@ -1,11 +1,13 @@
 # Test functions for data.py
 
-# Check that the data has the properties confirmed during the exploration in order to not break the pipeline
-    # No gaps after inception
-    # No UUP manual fix (see decision log)
-    # 204 month_end rebalance dates, 2005-2021
-    # lookback window free of NaNs at every rebalance date
-# Make tests now because a later step depends on the oputput of the pre-processing
+## Test functions for the processed data (data/processed/)
+    # Checks that the files produced by preprocessing keep the properties confirmed
+    # during exploration, since every later step depends on them:
+    # - no gaps after each ETF's inception
+    # - the manual UUP fix is applied (see decision log)
+    # - 204 month-end rebalance dates, 2005–2021
+    # - no NaNs in the lookback window at any rebalance date
+    # - all files share the same dates and tickers
     
     
 ## 5 Tests ##
@@ -13,16 +15,13 @@
 # Imports
 import pandas as pd
 import pytest
-from vportfolio.params import PROCESSED, RESEARCH_END, LOOKBACK, RESEARCH_START, RESEARCH_END
+from vportfolio.params import PROCESSED, RESEARCH_END, LOOKBACK, RESEARCH_START
 
 # Data is only local, so skip if not available
 pytestmark = pytest.mark.skipif(not PROCESSED.exists(), reason="processed data not available")
 
-# We use a decorator to make sure that the data is loaded only once per module, and not for every test function
+# Load the processed files once (thanks to the decorator)and share them with every test in this file
 @pytest.fixture(scope="module")
-
-# loads the processed data from parquet files and returns a dictionary with the dataframes
-# will share the data with all tests accross the file thanks to the above decorator
 def data():
     return {
         "close":    pd.read_parquet(PROCESSED / "close.parquet"),
@@ -57,3 +56,14 @@ def test_lookback_windows_have_no_nans(data):
         assets = elig.columns[elig.loc[d]] # finds which ETFs are eligible for each date of 204
         window = ret.loc[:d, assets].tail(LOOKBACK) # builds new window based on previous step
         assert window.notna().all().all(), f"NaNs in lookback window at {d}" # will check if each ETF has values for each day and if all ETFs pass. will return a date if there is an issue
+        
+# prices, returns and eligibility line up: same dates and same tickers
+def test_files_aligned(data):
+    for key in ["returns", "eligible"]:
+        assert data[key].index.equals(data["close"].index), key
+        assert data[key].columns.equals(data["close"].columns), key
+
+# the risk-free rate covers every trading day, with no gaps
+def test_rf_complete(data):
+    assert data["close"].index.isin(data["rf"].index).all()
+    assert data["rf"].loc[data["close"].index].notna().all()
