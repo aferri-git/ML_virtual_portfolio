@@ -3,6 +3,7 @@
 
 import pandas as pd
 import numpy as np
+from pathlib import Path
 from vportfolio import allocators, pipelines
 
 # helper: a small fake data dictionary with the keys trial_pipeline expects
