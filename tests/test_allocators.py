@@ -5,33 +5,47 @@
 import pandas as pd
 import numpy as np
 from vportfolio.allocators import sixty_forty, equal_weights, risk_weighted, min_var, min_var_raw, min_var_denoised
-
+    
 # 60/40 allocator
 def test_sixty_forty():
-    target = 1
-    weights = sixty_forty(_=None) # makes sure to ignore any argument given
+    weights = sixty_forty(None)
     expected = pd.Series({"SPY": 0.6, "AGG": 0.4})
+    # 1. always true: weights sum to 1
+    assert weights.sum() == 1
+    # 2. known answer weights are 60 and 40
     assert weights.equals(expected)
-    assert np.isclose(weights.sum(), 1)
+    # 3. inputs matter: by design they don't, so the window is ignored
+    rng = np.random.default_rng(0)
+    assert sixty_forty(pd.DataFrame(rng.normal(size=(10, 3)))).equals(weights)
 
 # Equal weight allocator
 def test_equal_weights():
     rng = np.random.default_rng(0) # fix the seed to ensure reproducibility
     window  = pd.DataFrame(rng.random((2,3)), columns = ["A", "B", "C"])
     weights = equal_weights(window)
-    assert np.isclose(weights, 1/3).all()
+    # 1. always true: weights sum to 1 and are never negative
     assert np.isclose(weights.sum(), 1)
+    assert (weights >= 0).all()
+    # 2. known answer: 3 ETFs → 1/3 each
+    assert np.isclose(weights, 1/3).all()
+    # 3. inputs matter: the number of ETFs sets the weight (4 ETFs → 1/4 each)
+    window_four = pd.DataFrame(rng.random((2, 4)), columns=["A", "B", "C", "D"])
+    assert np.isclose(equal_weights(window_four), 1/4).all()
 
 # Risk weighted allocator
 def test_risk_weighted():
-    window =pd.DataFrame({"A": [1, -1], "B": [2, -2], "C": [4, -4]}) # fix the values to ensure volatility ratio of 1:2:4
-    weights= risk_weighted(window)
-    # vols are 1.414, 2.828, 5.657 -> ratio 1 : 2 : 4
-    # inverse vols 1, 1/2, 1/4 -> sum 7/4
-    # weights = (1, 1/2, 1/4) / (7/4) = 4/7, 2/7, 1/7
-    expected = pd.Series({"A": 4/7, "B": 2/7, "C": 1/7})
-    assert np.isclose(weights, expected, atol=1e-12).all() # check that the weights are correct
+    window = pd.DataFrame({"A": [1, -1], "B": [2, -2], "C": [4, -4]}) # volatility ratio 1 : 2 : 4
+    weights = risk_weighted(window)
+    # 1. always true: weights sum to 1 and are never negative
     assert np.isclose(weights.sum(), 1)
+    assert (weights >= 0).all()
+    # 2. known answer: inverse vols 1, 1/2, 1/4 (sum 7/4) → 4/7, 2/7, 1/7
+    expected = pd.Series({"A": 4/7, "B": 2/7, "C": 1/7})
+    assert np.isclose(weights, expected, atol=1e-12).all()
+    # 3. inputs matter: doubling C's volatility lowers its weight
+    window_c_up = window.copy()
+    window_c_up["C"] = window_c_up["C"] * 2
+    assert risk_weighted(window_c_up)["C"] < weights["C"]
 
 # Minimum variance allocator
 def test_min_var():
@@ -61,7 +75,8 @@ def test_min_var():
     assert np.isclose(w["B"], 0.4, atol=0.01)
     assert not np.allclose(min_var(window_many, denoise=True), min_var(window_many, denoise=False))
 
-# And its wrappers
+
+# Minimum variance wrappers: each passes its own setting through
 def test_min_var_wrappers():
     rng = np.random.default_rng(0)
     window = pd.DataFrame(rng.normal(size=(504, 10)) * np.linspace(0.002, 0.02, 10))
