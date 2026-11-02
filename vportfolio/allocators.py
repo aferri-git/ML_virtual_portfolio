@@ -42,6 +42,7 @@ def min_var(window, cap = CAP, denoise = False):
     cov = cov * 252 * 10000 # annualised, in percent^2: same best weights, better-sized numbers, will allow the minimizer to run properly by scaling the covariance
     n = window.shape[1] # number of ETFs
     starting_weights = np.ones(n)/n # set the weights to equal values
+    # below is the appliocation of portfolio variance's formula: for two assets A and B, covariance_A_B  = w_A² · var_A + w_B² · var_B + 2 · w_A · w_B · cov_AB
     objective = lambda w: w @ cov @ w # sets the objective to the min var portfolio
     constraints = {"type": "eq", "fun": lambda w: w.sum() - 1} # the sum must add to one. the dictionary format is needed for scipy's minimize
     bounds = [(0, cap)] * n # set the cap between 0 and desired cap (20%)

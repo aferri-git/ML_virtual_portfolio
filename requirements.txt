@@ -24,6 +24,7 @@ matplotlib
 seaborn
 
 # Added later
+tabulate
 # fastapi
 # uvicorn
 # pydantic

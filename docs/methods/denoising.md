@@ -33,7 +33,7 @@ with it extra trials.
 Raising the smallest eigenvalues lowers the condition number (largest / smallest
 eigenvalue), so the matrix is better conditioned and the optimiser is more stable.
 
-## Summary 30-10-2026
+## Matrix-level findings (30-10-2026)
 - Window ending 2021-12-31 (504 days × 21 ETFs, q = 24): 3 eigenvalues above the
   Marčenko–Pastur ceiling (guess was 4: risk appetite, rates, oil, dollar)
 - Condition number: 560 raw → 33 denoised
@@ -41,3 +41,12 @@ eigenvalue), so the matrix is better conditioned and the optimiser is more stabl
   small estimation error. A lower value means allocators using the denoised matrix
   should produce more stable weights; the raw vs denoised minimum-variance backtest
   will test whether this holds in practice
+
+## Result of backtest on minimum variance allocator (2-11-2026)
+- Min Var allocator works: lowest volatility and drawdown compared to other allocators
+- It does not however pay off in returns --> the Sharpe is the lowest of the five
+- Denoising does help the turnover, with slightly lower value for the denoised version
+
+## Why the denoising effect is relatively small (2-11-2026)
+- We have a lot of data per each asset; noise is modest for 21 ETFs and 504 days. The ML book shows large gains when data is scarce
+- The 20% cap already limits the optimiser. The cap stops the allocator from betting heavily on random correlations, which is what denoising should prevent --> part of the job is already done a priori
