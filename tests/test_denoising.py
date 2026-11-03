@@ -1,4 +1,4 @@
-## Test functions for engine.py
+## Test functions for denoising.py
 
 # Imports
 import pandas as pd

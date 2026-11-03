@@ -8,9 +8,6 @@
     # - 204 month-end rebalance dates, 2005–2021
     # - no NaNs in the lookback window at any rebalance date
     # - all files share the same dates and tickers
-    
-    
-## 5 Tests ##
 
 # Imports
 import pandas as pd

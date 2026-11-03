@@ -4,7 +4,7 @@
 # Imports
 import pandas as pd
 import numpy as np
-from vportfolio.allocators import sixty_forty, equal_weights, risk_weighted, min_var, min_var_raw, min_var_denoised
+from vportfolio.allocators import sixty_forty, equal_weights, risk_weighted, min_var, min_var_raw, min_var_denoised, hrp
     
 # 60/40 allocator
 def test_sixty_forty():
@@ -82,3 +82,23 @@ def test_min_var_wrappers():
     window = pd.DataFrame(rng.normal(size=(504, 10)) * np.linspace(0.002, 0.02, 10))
     assert min_var_raw(window).equals(min_var(window, denoise=False))
     assert min_var_denoised(window).equals(min_var(window, denoise=True))
+    
+# hrp
+def test_hrp():
+    rng = np.random.default_rng(0)
+    window_two = pd.DataFrame(rng.normal(size=(10000, 2)) * [0.01, 0.02], columns=["A", "B"])
+    window_many = pd.DataFrame(rng.normal(size=(504, 10)) * np.linspace(0.002, 0.02, 10),
+                            columns=list("ABCDEFGHIJ"))
+    # 1. always true: weights sum to 1, all positive, in the window's column order
+    w = hrp(window_many)
+    assert np.isclose(w.sum(), 1)
+    assert (w > 0).all()
+    assert list(w.index) == list(window_many.columns)
+    # 2. known answer: two uncorrelated assets, vols 1% and 2% → one split, α = 1 − 1/(1+4) → 0.8 / 0.2
+    w = hrp(window_two)
+    assert np.isclose(w["A"], 0.8, atol=0.02)
+    assert np.isclose(w["B"], 0.2, atol=0.02)
+    # 3. inputs matter: tripling A's volatility lowers its weight
+    window_up = window_many.copy()
+    window_up["A"] = window_up["A"] * 3
+    assert hrp(window_up)["A"] < hrp(window_many)["A"]

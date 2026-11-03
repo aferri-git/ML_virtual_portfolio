@@ -4,7 +4,7 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from vportfolio.trials import save_returns, make_new_row, update_trials_log
+from vportfolio.trials import save_returns, load_navs, make_new_row, update_trials_log
 from vportfolio.allocators import equal_weights
 
 # save_returns
@@ -24,6 +24,20 @@ def test_save_returns(tmp_path): # tmp_path: a fresh temporary folder for this t
     path = save_returns("test", pd.Series([1.0, 2.0, 3.0], index=dates), folder)
     assert np.isclose(pd.read_parquet(path)["test"], [1.0, 0.5]).all()
 
+# load_navs
+def test_load_navs(tmp_path):
+    dates = pd.date_range("2020-01-01", periods=3)
+    save_returns("a", pd.Series([1.0, 1.1, 1.21], index=dates), tmp_path)   # +10% a day
+    save_returns("b", pd.Series([1.0, 2.0, 3.0], index=dates), tmp_path)    # +100%, then +50%
+    navs = load_navs(["a", "b"], folder=tmp_path)
+    # 1. always true: one column per name, no NaNs
+    assert list(navs.columns) == ["a", "b"]
+    assert navs.notna().all().all()
+    # 2. known answer: compounding the returns gives 1.1, then 1.21
+    assert np.allclose(navs["a"], [1.1, 1.21])
+    # 3. inputs matter: different saved returns give different NAVs
+    assert np.allclose(navs["b"], [2.0, 3.0])
+    
 # make_new_row
 def test_make_new_row():
     performance = pd.Series({"ann_return": 0.01, "ann_vol": 0.1, "sharpe": 0.5, "max_drawdown": -0.2})

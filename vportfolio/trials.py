@@ -15,6 +15,11 @@ def save_returns(name, nav, folder = BACKTEST):
         raise ValueError(f"{name} did not save correctly")
     return path # returns the file's location for reference
 
+# rebuild each strategy's NAV (starting at 1) from its saved daily returns
+def load_navs(names, folder=BACKTEST):
+    returns = {n: pd.read_parquet(folder / f"{n}_returns.parquet")[n] for n in names}
+    return (1 + pd.DataFrame(returns)).cumprod()
+
 # Creates a new row for the trials logs
 ## will return a dictionary with relevant information about the trial run
 def make_new_row(name, allocator, role, performance, turnover, returns_file, cap = CAP, lookback = LOOKBACK):

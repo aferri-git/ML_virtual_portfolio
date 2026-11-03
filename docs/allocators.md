@@ -32,7 +32,8 @@ except for the covariance: sample (min_var_raw) and denoised (min_var_denoised).
 | min_var_raw      | candidate  |        0.026 |     0.034 |    0.438 |         -0.141 |          0.07  |
 | min_var_denoised | candidate  |        0.027 |     0.034 |    0.469 |         -0.14  |          0.068 |
 
-![Minimum variance vs benchmarks](figures/min_var_vs_benchmarks.png)
+![Minimum variance vs benchmarks](figures/min_var.png)
+![Minimum variance vs benchmarks](figures/min_var_ratio.png)
 
 **Findings**
 - Minimum variance delivers the lowest volatility (3.4%) and drawdown (−14%) of all strategies, but the weakest risk-adjusted return (Sharpe 0.44–0.47)
@@ -51,3 +52,20 @@ second model that identifies the current regime and chooses the allocator accord
 Machine Learning*). It is outside the pre-registered scope: the regime would have to
 be detected in real time, not in hindsight, and every regime–allocator combination
 would count as an additional trial for the Deflated Sharpe Ratio
+
+### Hierarchical Risk Parity (HRP) 3-11-20256
+| name             | role       |   ann_return |   ann_vol |   sharpe |   max_drawdown |   avg_turnover |
+|:-----------------|:-----------|-------------:|----------:|---------:|---------------:|---------------:|
+| sixty_forty      | benchmark  |        0.082 |     0.114 |    0.65  |         -0.357 |          0.022 |
+| equal_weights    | benchmark  |        0.057 |     0.1   |    0.492 |         -0.337 |          0.038 |
+| risk_weighted    | diagnostic |        0.042 |     0.052 |    0.588 |         -0.194 |          0.035 |
+| min_var_raw      | candidate  |        0.026 |     0.034 |    0.438 |         -0.141 |          0.07  |
+| min_var_denoised | candidate  |        0.027 |     0.034 |    0.469 |         -0.14  |          0.068 |
+| hrp              | candidate  |        0.031 |     0.038 |    0.532 |         -0.117 |          0.122 |
+![Minimum variance vs benchmarks](figures/hrp.png)
+
+**Findings**
+The turnover of the hrp model is the highest so far. It seems that the structure of the model is working against itself. 
+- The tree reorders every month. Single linkage is sensitive: a small change in one correlation can move an ETF to a different branch, which changes the leaf order.
+- Bisection is by count, not by branch. When the order shifts, an ETF can land in a different half at the top split, and its weight is multiplied by a very different α. A tiny change in the data becomes a large jump in weight.
+- The cap amplifies it: about 70% of the portfolio gets redistributed every month, in proportions that follow these unstable small weights.

@@ -91,10 +91,11 @@ def denoise_corr(corr, t, bandwidth = 0.25):
 
 # Obtain the covariance matrix from the denoised correlation matrix and the volatilities of the returns
     # will return a dataframe with the denoised covariance matrix
-def denoised_cov ( window):
+def denoised_cov (window):
     t = window.shape[0] # number of days in lookback window
     vols = window.std() # volatilities from the returns
     corr = window.corr() # raw correlation
     denoised = denoise_corr(corr, t) # denoise the correlation
     cov = denoised * np.outer(vols, vols) # rebuild the covariance
     return cov
+

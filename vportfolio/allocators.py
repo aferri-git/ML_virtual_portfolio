@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np 
 from scipy.optimize import minimize
 from vportfolio.params import CAP
-from vportfolio import denoising
+from vportfolio import denoising, clustering
 
 
 # 60/40 allocator
@@ -33,6 +33,7 @@ def risk_weighted(window):
     return pd.Series(weights, index = window.columns)
 
 # Minimum variance allocator
+# returns a dataframe with the weights of the ETFs in the window, using the minimum variance algorithm
 def min_var(window, cap = CAP, denoise = False):
     if denoise:
     # use the array definition to keep the math fast
@@ -62,3 +63,27 @@ def min_var_raw(window):
 
 def min_var_denoised(window):
     return min_var(window, denoise=True)
+
+
+# Hierarchical Risk Parity (HRP) allocator
+# returns a dataframe with the weights of the ETFs in the window, using the HRP algorithm
+def hrp(window):
+    cov = window.cov()
+    order = clustering.tree_order(window.corr())
+    w = pd.Series(1.0, index=order) # every ETF start at weight 1
+    groups = [order] # the starting group is the whole ETFs list as per tree order
+    while groups:
+        new_groups = []
+        for g in groups:
+            if len(g) == 1:
+                continue
+            half = len(g) // 2 # // divides and rounds down: 4 → 2, 5 → 2
+            left, right = g[:half], g[half:] # first half, second half
+            v_left = clustering.cluster_variance(cov, left)
+            v_right = clustering.cluster_variance(cov, right)
+            alpha = 1 - v_left / (v_left + v_right) # left half's share
+            w.loc[left] *= alpha # scale the left half's weights
+            w.loc[right] *= 1 - alpha # and the right half's
+            new_groups += [left, right]
+        groups = new_groups
+    return w.reindex(window.columns)
