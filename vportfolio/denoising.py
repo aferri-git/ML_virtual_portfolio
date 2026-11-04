@@ -91,10 +91,22 @@ def denoise_corr(corr, t, bandwidth = 0.25):
 
 # Obtain the covariance matrix from the denoised correlation matrix and the volatilities of the returns
     # will return a dataframe with the denoised covariance matrix
-def denoised_cov ( window):
+def denoised_cov (window):
     t = window.shape[0] # number of days in lookback window
     vols = window.std() # volatilities from the returns
     corr = window.corr() # raw correlation
     denoised = denoise_corr(corr, t) # denoise the correlation
     cov = denoised * np.outer(vols, vols) # rebuild the covariance
     return cov
+
+# detone a correlation matrix
+# will return a dataframe with the detoned correlation matrix
+def detone_corr(corr):
+    eigenvals, eigenvec = np.linalg.eigh(corr) # smallest first
+    lambda_1 = eigenvals[-1] # market factor: the largest eigenvalue
+    v1 = eigenvec[:, -1] # and its eigenvector (last column)
+    market_part = lambda_1 * np.outer(v1, v1) # the market's contribution to the matrix
+    detoned = corr - market_part # remove it
+    d = np.sqrt(np.diag(detoned)) # rescale so the diagonal is 1 again
+    detoned = detoned / np.outer(d, d)
+    return pd.DataFrame(detoned, index=corr.index, columns=corr.columns)

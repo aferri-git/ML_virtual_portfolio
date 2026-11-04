@@ -47,6 +47,8 @@ eigenvalue), so the matrix is better conditioned and the optimiser is more stabl
 - It does not however pay off in returns --> the Sharpe is the lowest of the five
 - Denoising does help the turnover, with slightly lower value for the denoised version
 
+![Denoised relative to raw](../figures/min_var_ratio.png)
+
 ## Why the denoising effect is relatively small (2-11-2026)
 - We have a lot of data per each asset; noise is modest for 21 ETFs and 504 days. The ML book shows large gains when data is scarce
 - The 20% cap already limits the optimiser. The cap stops the allocator from betting heavily on random correlations, which is what denoising should prevent --> part of the job is already done a priori
