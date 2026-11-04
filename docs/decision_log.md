@@ -41,3 +41,4 @@
     x No cap inside NCO: the engine applies the 20% cap to the final weights
     x The book's version allows short positions; long-only is used here, as pre-registered
 - All decided before any NCO backtest
+- After NCO sanity checking: pro-rata capping inflates near-zero weights when NCO is concentrated (EMLC 0.5% → 20%), so the cap is applied by re-running NCO on the remaining assets instead
