@@ -3,7 +3,7 @@
 # Imports
 import pandas as pd
 import numpy as np
-from vportfolio.denoising import denoise_with_ceiling, fit_sigma2, kde, mp_pdf, denoise_corr, denoised_cov
+from vportfolio.denoising import denoise_with_ceiling, fit_sigma2, kde, mp_pdf, denoise_corr, denoised_cov, detone_corr
 
 # small helper function to calculate the condition number
 def cond(m):
@@ -124,3 +124,28 @@ def test_denoised_cov():
     # 3. inputs matter: the correlations inside it are the denoised ones
     vols = window_test.std()
     assert np.allclose(result / np.outer(vols, vols), denoise_corr(window_test.corr(), 500))
+    
+# detone_corr
+def test_detone_corr():
+    # 1. always true: symmetric, diagonal 1, no NaNs
+    rng = np.random.default_rng(0)
+    random_corr = pd.DataFrame(rng.normal(size=(500, 6))).corr()
+    result = detone_corr(random_corr)
+    assert np.allclose(result, result.T)
+    assert np.allclose(np.diag(result), 1)
+    assert result.notna().all().all()
+    # 2. known answer: pure market (all 0.6) → off-diagonals become −1/(n−1) = −0.25 with 5 assets
+    m = np.full((5, 5), 0.6)
+    np.fill_diagonal(m, 1)
+    result = detone_corr(pd.DataFrame(m))
+    off_diag = ~np.eye(5, dtype=bool)
+    assert np.allclose(result.values[off_diag], -0.25)
+    # 3. inputs matter: block structure survives (0.8 within blocks, 0.3 between)
+    m = np.full((6, 6), 0.3)
+    m[:3, :3] = 0.8
+    m[3:, 3:] = 0.8
+    np.fill_diagonal(m, 1)
+    result = detone_corr(pd.DataFrame(m))
+    within = result.values[0, 1] # inside block 1
+    between = result.values[0, 3] # block 1 vs block 2
+    assert within > between

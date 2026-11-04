@@ -6,9 +6,12 @@
     # 4. Continue until everything sits in one group
 
 # Imports
+import pandas as pd
 import numpy as np
 from scipy.cluster.hierarchy import linkage, leaves_list
 from scipy.spatial.distance import squareform
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_samples
 
 # let's create a function to translate correlation to distance as future models will use it
 # returns a distance matrix from a correlation matrix, using the formula d = sqrt((1-corr)/2)
@@ -31,3 +34,18 @@ def cluster_variance(cov, tickers):
     w = 1/np.diag(cluster_covariance) # inverse-variance weights inside the group
     w = w/w.sum() # normalized
     return w @ cluster_covariance @ w # cluster's variance
+
+# try k = 2..max_k clusters with k-means, score each grouping by the silhouette (mean ÷ std)
+# Return the best grouping as a Series of cluster labels indexed by ticker
+def onc(corr, max_k=10, n_init=10):
+    dist = corr_to_distance(corr)
+    max_k = min(max_k, len(corr) - 1) # silhouettes need fewer clusters than ETFs
+    best_score, best_labels = -np.inf, None # list to store best results. -np.inf makes sure that the first grouping will beat it
+    for k in range(2, max_k + 1): # start at 2 and add 1 cluster to each iteration
+        for seed in range(n_init): # for each k, try n_init random starts for cluster positioning
+            labels = KMeans(n_clusters=k, n_init=1, random_state=seed).fit(dist).labels_ # run the k-means optimizer for cluster centroids
+            sil = silhouette_samples(dist, labels) # apply the scoring method to the k-means optimizer
+            score = sil.mean() / sil.std()  # score the whole group with one number
+        if score > best_score: # if this group beats best score
+            best_score, best_labels = score, labels # add it to the empty series                        
+    return pd.Series(best_labels, index=corr.index)

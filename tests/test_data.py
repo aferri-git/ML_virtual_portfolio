@@ -17,7 +17,6 @@ from vportfolio.params import PROCESSED, RESEARCH_END, LOOKBACK, RESEARCH_START
 # Data is only local, so skip if not available
 pytestmark = pytest.mark.skipif(not PROCESSED.exists(), reason="processed data not available")
 
-# Load the processed files once (thanks to the decorator)and share them with every test in this file
 @pytest.fixture(scope="module")
 def data():
     return {
@@ -25,6 +24,7 @@ def data():
         "returns":  pd.read_parquet(PROCESSED / "returns.parquet"),
         "eligible": pd.read_parquet(PROCESSED / "eligible.parquet"),
         "rebal":    pd.read_parquet(PROCESSED / "rebal_dates.parquet")["date"],
+        "rf":       pd.read_parquet(PROCESSED / "rf_daily.parquet")["rf"],
     }
 
 # make sure every ETF has no gaps after its inception date

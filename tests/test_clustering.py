@@ -3,7 +3,7 @@
 # corr_to_distance
 import pandas as pd
 import numpy as np
-from vportfolio.clustering import corr_to_distance, tree_order, cluster_variance
+from vportfolio.clustering import corr_to_distance, tree_order, cluster_variance, onc  
 
 
 def test_corr_to_distance():
@@ -63,3 +63,29 @@ def test_cluster_variance():
     assert np.isclose(cluster_variance(cov, ["A"]), 1)        # a group of one: just its own variance
     cov_corr = pd.DataFrame([[1, 1], [1, 4]], index=["A", "B"], columns=["A", "B"])   # positive covariance
     assert cluster_variance(cov_corr, ["A", "B"]) > result        # moving together → less diversification → more risk
+    
+def test_onc():
+    # helper: correlations of fake returns where each block of assets shares one common factor
+    def block_corr(sizes, days=1000, seed=0):
+        rng = np.random.default_rng(seed)
+        blocks = []
+        for size in sizes:
+            factor = rng.normal(size=(days, 1)) # the block's shared movement
+            blocks.append(factor + 0.3 * rng.normal(size=(days, size)))  # plus each asset's own noise
+        returns = pd.DataFrame(np.hstack(blocks), columns=[f"X{i}" for i in range(sum(sizes))])
+        return returns.corr()
+    # 1. always true: one label per ticker, between 2 and max_k clusters
+    rng = np.random.default_rng(0)
+    random_corr = pd.DataFrame(rng.normal(size=(500, 8)), columns=list("ABCDEFGH")).corr()
+    labels = onc(random_corr)
+    assert labels.index.equals(random_corr.index)
+    assert 2 <= labels.nunique() <= 7 # max_k is capped at 8 − 1 = 7
+    # 2. known answer: three blocks of 3 → 3 clusters, each block together
+    labels = onc(block_corr([3, 3, 3]))
+    assert labels.nunique() == 3
+    assert labels.iloc[0] == labels.iloc[1] == labels.iloc[2]
+    assert labels.iloc[3] == labels.iloc[4] == labels.iloc[5]
+    assert labels.iloc[6] == labels.iloc[7] == labels.iloc[8]
+    # 3. inputs matter: the structure sets the number of clusters (two blocks → 2, four blocks → 4)
+    assert onc(block_corr([3, 3])).nunique() == 2
+    assert onc(block_corr([4, 4, 4, 4])).nunique() == 4
