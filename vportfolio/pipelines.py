@@ -3,8 +3,7 @@
     
 # Imports
 import pandas as pd
-import numpy as np
-from vportfolio import allocators, engine,  metrics, trials
+from vportfolio import engine,  metrics, trials
 from vportfolio.params import CAP, LOOKBACK, BACKTEST, TRIALS_LOG
 
 # a pipeline to execute a trial on each new allocator
