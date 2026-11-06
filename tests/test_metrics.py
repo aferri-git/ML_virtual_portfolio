@@ -4,7 +4,7 @@
 import pandas as pd
 import numpy as np
 import pytest
-from vportfolio.metrics import performance_calculator
+from vportfolio.metrics import performance_calculator, psr
 
 # helper: a NAV built from a list of daily returns, starting at 1, with a matching risk-free series
 def make_nav(daily_returns, rf=0.0):
@@ -50,5 +50,32 @@ def test_metrics_risk_free_matters():
     assert sharpe_low > 0 # return above the risk-free rate
     assert sharpe_high < 0 # return below the risk-free rate
     
-    
-    
+
+# PSR: Probability of Sharpe Ratio
+def test_psr():
+    rng = np.random.default_rng(0)
+    dates = pd.bdate_range("2020-01-01", periods=2520) # 10 years of business days
+    test_rf = pd.Series(0.0, index=dates) # risk-free rate of 0
+    # a random NAV: daily returns drawn with mean 0.0004 and std 0.01 (the sample comes out weaker)
+    returns = pd.Series(rng.normal(0.0004, 0.01, size=2520), index=dates)
+    nav = (1 + returns).cumprod()
+    # a "strong" NAV: draws rescaled so the sample has exactly mean 0.0004 and std 0.01 (daily Sharpe 0.04)
+    draws = rng.normal(size=2520)
+    strong = pd.Series((draws - draws.mean()) / draws.std() * 0.01 + 0.0004, index=dates)
+    nav_strong = (1 + strong).cumprod()
+    # 1. always true: the PSR is a probability, between 0 and 1
+    test = psr(nav, test_rf)
+    assert 0 <= test <= 1
+    # 2. known answers
+    # 2a. threshold equal to the strategy's own (annual) Sharpe → exactly 0.5
+    nav_returns = nav.pct_change(fill_method=None).dropna() # the same returns psr uses
+    own_sharpe = nav_returns.mean() / nav_returns.std() * np.sqrt(252)
+    test2 = psr(nav, test_rf, own_sharpe)
+    assert np.isclose(test2, 0.5, atol=1e-6)
+    # 2b. a strong Sharpe over 10 years → very likely above 0
+    assert psr(nav_strong, test_rf) > 0.95
+    # 3. inputs matter
+    # 3a. a higher threshold is harder to beat → lower PSR
+    assert test2 < test
+    # 3b. a shorter track record (100 days) with the same strength → lower PSR
+    assert psr(nav_strong.iloc[:100], test_rf) < psr(nav_strong, test_rf)
