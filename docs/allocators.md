@@ -99,7 +99,7 @@ Correlation of daily returns:
 
 ### Conclusions
 The hypothesis was that denoised, cluster-based allocation (NCO, HRP) beats equal weight and 60/40 on net Sharpe. On the research period it is not supported: no candidate beats 60/40 (0.65), only HRP beats equal weight (0.53 vs 0.49, within one standard error), and the simple risk-weighted diagnostic (0.59) beats all three. What the candidates deliver is
-much lower risk: volatility 3.4–3.8% vs 10–11%, drawdown −10% to −14% vs −34% to −36%. The formal test is on the holdout period.
+much lower risk: volatility 3.4–3.8% vs 10–11%, drawdown −10% to −14% vs −34% to −36%. The formal test is on the holdout period. The only reservation I have is that all Sharpes are tightly packed together and as such are statistically indistinguishable, as per the standard error of roughly 0.25.
 
 
 ## Future work (min_var_backtested.ipynb)

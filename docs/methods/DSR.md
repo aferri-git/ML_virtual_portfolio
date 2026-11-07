@@ -48,3 +48,25 @@ The threshold sets the question:
 **Conclusion:** every strategy’s Sharpe is very likely above 0 (0.96–1.00). Against equal weight’s Sharpe, the candidates are indistinguishable from a coin flip (0.41–0.56; HRP highest). Against 60/40’s Sharpe, the probability that any candidate truly beats it is only 0.19–0.31. The candidates offer lower risk, not a demonstrably better risk-adjusted return
 
 ## Deflated Sharpe Ratio (DSR)
+
+N counts all 7 logged trials (benchmarks and diagnostic included). The book’s effective number of independent trials, which would be lower given the candidates’ high correlations, is not used: the plain count is simpler and stricter.
+
+
+|                  |   psr_vs_0 |   dsr |
+|:-----------------|-----------:|------:|
+| sixty_forty      |       1    |  0.99 |
+| equal_weights    |       0.98 |  0.94 |
+| risk_weighted    |       0.99 |  0.98 |
+| hrp              |       0.99 |  0.96 |
+| nco              |       0.97 |  0.93 |
+| min_var_raw      |       0.96 |  0.91 |
+| min_var_denoised |       0.97 |  0.93 |
+
+The luck-only bar is 0.104: by chance alone, the best of the 7 trials would be expected to reach an annual Sharpe of about 0.10.
+
+The DSR is so low because it is based on how spread the sharpes are. In our trials, every strategy has a relatively comparable Sharpe ratio so the correlation makes the estimate rough
+
+**Conclusions**
+- Every strategy clears the luck bar with a solid margin
+- HRP is the best candidate, with a DSR of 0.96. That is just above the pre-registered treshold of 0.95. The candidates earn a genuine positive risk-adjusted return, but not a demonstrably better one than equal weight or 60/40.
+- NCO and min_var allocators are close to the bar but below it (0.91 and 0.93)

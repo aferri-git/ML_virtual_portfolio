@@ -4,7 +4,7 @@
 import pandas as pd
 import numpy as np
 import pytest
-from vportfolio.metrics import performance_calculator, psr
+from vportfolio.metrics import performance_calculator, psr, expected_max_sharpe, dsr
 
 # helper: a NAV built from a list of daily returns, starting at 1, with a matching risk-free series
 def make_nav(daily_returns, rf=0.0):
@@ -79,3 +79,27 @@ def test_psr():
     assert test2 < test
     # 3b. a shorter track record (100 days) with the same strength → lower PSR
     assert psr(nav_strong.iloc[:100], test_rf) < psr(nav_strong, test_rf)
+    
+# excected_max_sharpe and dsr
+def test_dsr():
+    # helper function to create fake sharpe ratios
+    def fake_sharpes(n, mean, std, seed=0):
+        draws = np.random.default_rng(seed).normal(size=n)
+        return pd.Series((draws - draws.mean()) / draws.std() * std + mean) # exactly this mean and std
+    # 10 years of business days
+    rng = np.random.default_rng(0) # fix seed
+    dates = pd.bdate_range("2020-01-01", periods=2520)
+    test_rf = pd.Series(0.0, index=dates) # risk-free rate of 0
+    # a strong NAV: exactly mean 0.0004 and std 0.01 per day (annual Sharpe = 0.63)
+    draws = rng.normal(size=2520)
+    strong = pd.Series((draws - draws.mean()) / draws.std() * 0.01 + 0.0004, index=dates)
+    nav_strong = (1 + strong).cumprod()
+    # 1. always true: the DSR is a probability between 0 and 1
+    test = dsr(nav_strong, test_rf, fake_sharpes(7, 0.5, 0.2))
+    assert 0 <= test <= 1
+    # 2. known answer: all trials with the same Sharpe → SR0 = 0 → DSR equals the PSR against 0
+    equal_sharpes = pd.Series([0.5] * 7)
+    assert np.isclose(dsr(nav_strong, test_rf, equal_sharpes), psr(nav_strong, test_rf), atol=1e-9)
+    # 3. inputs matter: more trials, or more spread among them, raise the bar → lower DSR
+    assert dsr(nav_strong, test_rf, fake_sharpes(50, 0.5, 0.2)) < test   # 50 trials vs 7
+    assert dsr(nav_strong, test_rf, fake_sharpes(7, 0.5, 0.4)) < test    # spread 0.4 vs 0.2

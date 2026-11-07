@@ -3,7 +3,6 @@
 # Imports
 import pandas as pd
 from vportfolio.params import CAP, LOOKBACK, TRIALS_LOG, BACKTEST
-from vportfolio.allocators import equal_weights
 
 # Storing of NAV returns data from backtesting of different allocators into a parquet file
 def save_returns(name, nav, folder = BACKTEST):
