@@ -42,3 +42,17 @@
     x The book's version allows short positions; long-only is used here, as pre-registered
 - All decided before any NCO backtest
 - After NCO sanity checking: pro-rata capping inflates near-zero weights when NCO is concentrated (EMLC 0.5% → 20%), so the cap is applied by re-running NCO on the remaining assets instead
+
+## 07-11-2026
+- In the DSR calculation, N counts all 7 logged trials (benchmarks and diagnostic included). The book’s effective number of independent trials, which would be lower given the candidates’ high correlations, is not used: the plain count is simpler and stricter. Written before the run
+- Holdout selection: NCO is taken to the holdout, alone
+    x The pre-registration did not define "best-supported allocator", so the rule is set now, after the research results and before any holdout data is used
+    x Rule: among candidates whose Sharpe ratios are statistically indistinguishable, take the one with the lowest maximum drawdown
+    x Candidates' Sharpes (0.47–0.53) differ by less than one standard error (0.25; 0.11 for the difference, given correlations of 0.88–0.91). PSR vs equal weight 0.41–0.56
+    x NCO has the lowest drawdown of all strategies (−9.7% vs −11.7% HRP, −14.0% min_var)
+- Caveats
+    x Maximum drawdown is a single-episode estimate, noisier than the Sharpe
+    x NCO's turnover (8.3%) is above min_var's (6.8%)
+    x NCO's research DSR is 0.93, below the pre-registered 0.95; HRP (0.96) would have been chosen on Sharpe or DSR alone
+- Only NCO is run on the holdout: the period is too short (under 5 years) to separate two candidates correlated at 0.91, and a single pre-committed test keeps the holdout clean
+- Success criteria unchanged: net Sharpe above equal weight and 60/40, and DSR ≥ 0.95

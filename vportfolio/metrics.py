@@ -33,7 +33,6 @@ def performance_calculator (nav, rf_daily):
     
 # calculate the PSR on given inputs
 # will return a probability between 0 and 1
-
 def psr(nav, rf_daily, sr_threshold = 0):
     # calculate daily returns
     daily_returns = nav.pct_change(fill_method=None).dropna()
@@ -52,3 +51,21 @@ def psr(nav, rf_daily, sr_threshold = 0):
     z = (d_sharpe - d_tr)*np.sqrt(T-1)/np.sqrt(1-skew_*d_sharpe+(kurt_-1)/4*d_sharpe**2)
     # turn z to a probability between 0 and 1
     return norm.cdf(z)
+
+# Expected maximum Sharpe ratio from pure luck, given N trials
+# returns the annual Sharpe that the best of N trials would reach by chance alone (the DSR threshold)
+def expected_max_sharpe(sharpes):
+    N = len(sharpes)
+    V = sharpes.var() # more spread, more likely to stand out by chance
+    # values under which does a share of the normald istribution lie
+    z_1 = norm.ppf(1-1/N)
+    z_2 = norm.ppf(1-1/(N*np.e))
+    y = 0.5772 # Euler–Mascheroni constant
+    SR = np.sqrt(V) * ((1 - y) * z_1 + y * z_2)
+    return SR
+
+# Deflated Sharpe Ratio: PSR against the best Sharpe expected from luck, given all trials
+# returns the DSR
+def dsr(nav, rf_daily, sharpes):
+    sr0 = expected_max_sharpe(sharpes)
+    return psr(nav, rf_daily, sr_threshold=sr0)
