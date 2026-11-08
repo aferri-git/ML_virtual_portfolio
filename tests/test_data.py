@@ -2,6 +2,7 @@
 
 # imports
 import pandas as pd
+import numpy as np
 from vportfolio.data import split_prices, apply_fixes, make_returns, make_eligible, make_rebal_dates, make_rf_daily, estimate_costs
 from vportfolio.params import BENCHMARK, BENCHMARK, RISK_FREE, RISK_FREE, UNIVERSE
 
