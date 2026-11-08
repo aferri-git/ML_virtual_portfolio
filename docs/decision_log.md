@@ -63,3 +63,8 @@
 - Live paper portfolio: NCO is still run live, labelled as not having passed the holdout, alongside equal weight and 60/40 as benchmarks
     x The purpose of the live stage is the data and automation infrastructure (daily data pipeline, monthly rebalancing, results store, dashboard) and an honest ongoing record, not a claim that NCO outperforms
     x No further strategies are tested on the holdout period; any new strategy would need a new pre-registration and a new holdout
+
+## 08-11-2026
+- Live rules written, see pre_registration.md → Amendments → Live paper portfolio
+    x Start moved to the next month-end after deployment (1 December), not 1 October: October data was already seen in the holdout run
+    x Prices stored as fetched, because Yahoo revises adjusted history after dividends

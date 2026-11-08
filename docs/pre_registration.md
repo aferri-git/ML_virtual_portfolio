@@ -61,7 +61,7 @@ or earlier), covering the main asset classes and their characteristics:
 ## Periods
 - Data from: 2003-01-01 (gives the 2-year lookback for the first rebalance)
 - Research (backtest): 2005-01-01 to 2021-12-31
-- Holdout (used once): 2022-01-01 to the live start date
+- Holdout (used once): 2022-01-01 to the data available on 07-11-2026
 - Live paper trading: from the live start date onwards
 - Expanding universe: an ETF becomes eligible once it has 504 trading days of history;
   no ETF is used before it existed
@@ -91,3 +91,20 @@ or earlier), covering the main asset classes and their characteristics:
   their liquidity. See decision_log.md (23-10-2026)
 - 2026-10-28: inverse volatility added as a diagnostic baseline after the equal-weight
   and 60/40 results were seen; success criteria unchanged. See decision_log.md (28-10-2026)
+  - 07-11-2026, after the research results and before the holdout: "best-supported allocator"
+  defined as the candidate with the lowest maximum drawdown among those whose Sharpe ratios
+  are statistically indistinguishable (PSR, DSR). This selects NCO, which alone is run on the
+  holdout. Success criteria unchanged. See decision_log.md (07-11-2026)
+
+### Live paper portfolio (added 08-11-2026, before any live data)
+- Strategies: NCO (did not pass the holdout), equal weight and 60/40 as benchmarks
+- Start: decision at the 30-11-2026 close, first trades at the 01-12-2026 open; starting NAV 1 each
+- Rebalancing as in research: decision on the last trading day's close, execution at the next open
+- Parameters frozen as in research: lookback 504, cap 20%, eligibility rule, NCO settings, cost estimates (cost_bp)
+- Data: Yahoo Finance (yfinance), adjusted prices; risk-free from ^IRX
+    x Prices are stored as fetched each day; past NAV is never recomputed from revised data
+- Missing data
+    x Holidays: no row, nothing to fill
+    x Missed runs: the next run catches up all missing days
+    x Single ticker missing on a normal day: last price carried forward, flagged; run stops after 3 consecutive days
+    x Missing data on a rebalance day: rebalance postponed to the first complete day
