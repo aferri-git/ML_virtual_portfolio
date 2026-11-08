@@ -16,6 +16,7 @@ UNIVERSE = ["SPY", "QQQ", "IWM", "EFA", "EEM", "TLT", "IEF", "SHY", "TIP",
             "LQD", "HYG", "EMB", "EMLC", "GLD", "DBC", "XLE", "VNQ",
             "UUP", "FXY", "FXA", "FXF"]
 BENCHMARK = ["AGG"]
+RISK_FREE = ["^IRX"]
 
 LOOKBACK = 504
 CAP = 0.20
@@ -35,3 +36,8 @@ DATA_KEYS = (["close", "open", "returns", "eligible", "rebal_dates", "cost_bp", 
 HOLDOUT = RESULTS / "holdout"
 HOLDOUT_LOG = HOLDOUT / "holdout_log.csv"
 HOLDOUT_START = "2021-12-31"   # first decision date: its trades happen in January 2022
+
+# Introduced for the live portfolio
+DATA_START = "2003-01-01"
+COST_OVERRIDES = ["SHY", "IEF", "TLT", "AGG", "TIP", "LQD"] # forced to 2 bp
+DATA_FIXES = [("UUP", "2007-06-20", "2007-06-19")] # (ticker, bad date, date to copy from)
