@@ -61,7 +61,7 @@ or earlier), covering the main asset classes and their characteristics:
 ## Periods
 - Data from: 2003-01-01 (gives the 2-year lookback for the first rebalance)
 - Research (backtest): 2005-01-01 to 2021-12-31
-- Holdout (used once): 2022-01-01 to the live start date
+- Holdout (used once): 2022-01-01 to the data available on 07-11-2026
 - Live paper trading: from the live start date onwards
 - Expanding universe: an ETF becomes eligible once it has 504 trading days of history;
   no ETF is used before it existed
