@@ -105,3 +105,29 @@ much lower risk: volatility 3.4–3.8% vs 10–11%, drawdown −10% to −14% vs
 ## Future work (min_var_backtested.ipynb)
 Each allocator performs best in a different environment: minimum variance in crises (2008, 2020), equity-heavy allocations in long expansions. A natural extension is a second model that identifies the current regime and chooses the allocator accordingly (regime switching; related to meta-labelling in López de Prado, *Advances in Financial
 Machine Learning*). It is outside the pre-registered scope: the regime would have to be detected in real time, not in hindsight, and every regime–allocator combination would count as an additional trial for the Deflated Sharpe Ratio
+
+## Holdout (07-11-2026)
+NCO, selected by the amended rule (lowest drawdown among candidates with statistically indistinguishable Sharpes), was run once on the holdout period: 04-01-2022 to 30-09-2026, with the two pre-registered benchmarks. Results in results/holdout/
+
+| name          | role      |   ann_return |   ann_vol |   sharpe |   max_drawdown |   avg_turnover |
+|:--------------|:----------|-------------:|----------:|---------:|---------------:|---------------:|
+| nco           | candidate |        0.019 |     0.031 |   -0.632 |         -0.071 |          0.112 |
+| equal_weights | benchmark |        0.051 |     0.082 |    0.169 |         -0.15  |          0.04  |
+| sixty_forty   | benchmark |        0.07  |     0.112 |    0.307 |         -0.205 |          0.031 |
+
+**Against the success criteria**
+- Net Sharpe above both benchmarks: **not met**. NCO −0.63, equal weight 0.17, 60/40 0.31 (PSR of NCO vs equal weight: …, vs 60/40: …)
+- DSR ≥ 0.95: **not met**. DSR = … (N = 8: the 7 research trials plus this run)
+- Maximum drawdown: NCO −7.1%, against −15.0% (equal weight) and −20.5% (60/40)
+
+**Against my expectations (written before the run)**
+- Expected a low Sharpe, below both benchmarks: confirmed, and lower than expected, below 0
+- Expected the DSR criterion not to be met: confirmed
+- Expected a lower drawdown than both benchmarks, especially in 2022: confirmed
+
+**Findings**
+- NCO earned 1.9% a year, less than T-bills over the period (≈ 3.5–4%), hence the negative Sharpe. Its defensive holdings (short and medium Treasuries, TIPS, the dollar, safe-haven currencies) lost value in 2022 as rates rose, and afterwards earned roughly the cash rate
+- The risk control held: the lowest volatility and drawdown of the three
+- Turnover rose to 11.2% per rebalance (8.3% in research)
+
+**Conclusion:** the pre-registered hypothesis, that denoised cluster-based allocation beats equal weight and 60/40 net of costs, is rejected. NCO delivered low risk, as in research, but in a period of high interest rates low risk without excess return underperformed cash

@@ -56,3 +56,10 @@
     x NCO's research DSR is 0.93, below the pre-registered 0.95; HRP (0.96) would have been chosen on Sharpe or DSR alone
 - Only NCO is run on the holdout: the period is too short (under 5 years) to separate two candidates correlated at 0.91, and a single pre-committed test keeps the holdout clean
 - Success criteria unchanged: net Sharpe above equal weight and 60/40, and DSR ≥ 0.95
+
+## 07-11-2026 (after the holdout run)
+- Holdout run once, as planned; no changes made after seeing the results
+- Hypothesis rejected: NCO met neither success criterion (Sharpe −0.63, DSR …)
+- Live paper portfolio: NCO is still run live, labelled as not having passed the holdout, alongside equal weight and 60/40 as benchmarks
+    x The purpose of the live stage is the data and automation infrastructure (daily data pipeline, monthly rebalancing, results store, dashboard) and an honest ongoing record, not a claim that NCO outperforms
+    x No further strategies are tested on the holdout period; any new strategy would need a new pre-registration and a new holdout
