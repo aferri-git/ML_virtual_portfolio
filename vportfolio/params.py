@@ -30,3 +30,8 @@ RAW_FILE = RAW / "yahoo_prices_2026-10-23.parquet"
 
 # Introduced for testing of data loading
 DATA_KEYS = (["close", "open", "returns", "eligible", "rebal_dates", "cost_bp", "rf_daily"])
+
+# Introduced for the run on the holdout period
+HOLDOUT = RESULTS / "holdout"
+HOLDOUT_LOG = HOLDOUT / "holdout_log.csv"
+HOLDOUT_START = "2021-12-31"   # first decision date: its trades happen in January 2022

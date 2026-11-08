@@ -1,0 +1,4 @@
+date,name,allocator,settings,role,ann_return,ann_vol,sharpe,avg_turnover,max_drawdown,returns_file
+2026-11-07,nco,nco,"cap=0.2, lookback=504",candidate,0.0194187149786568,0.0314802201450127,-0.6323245419471742,0.1115025843116021,-0.0711186632346165,/home/antonio/code/aferri-git/ML_virtual_portfolio/results/holdout/nco_returns.parquet
+2026-11-07,equal_weights,equal_weights,"cap=0.2, lookback=504",benchmark,0.0513511450551393,0.0819900699234789,0.1688991755905076,0.0403193892658766,-0.1502778397911387,/home/antonio/code/aferri-git/ML_virtual_portfolio/results/holdout/equal_weights_returns.parquet
+2026-11-07,sixty_forty,sixty_forty,"cap=None, lookback=1",benchmark,0.07001350740252033,0.11204913502945178,0.3067025908890215,0.031481397096658814,-0.20484704887812621,/home/antonio/code/aferri-git/ML_virtual_portfolio/results/holdout/sixty_forty_returns.parquet
