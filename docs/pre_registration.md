@@ -91,7 +91,7 @@ or earlier), covering the main asset classes and their characteristics:
   their liquidity. See decision_log.md (23-10-2026)
 - 2026-10-28: inverse volatility added as a diagnostic baseline after the equal-weight
   and 60/40 results were seen; success criteria unchanged. See decision_log.md (28-10-2026)
-  - 07-11-2026, after the research results and before the holdout: "best-supported allocator"
+- 07-11-2026, after the research results and before the holdout: "best-supported allocator"
   defined as the candidate with the lowest maximum drawdown among those whose Sharpe ratios
   are statistically indistinguishable (PSR, DSR). This selects NCO, which alone is run on the
   holdout. Success criteria unchanged. See decision_log.md (07-11-2026)

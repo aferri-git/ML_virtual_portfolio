@@ -14,3 +14,5 @@ I will use a universe of ETFs due to data reliability and availability considera
 
 
 © 2026 Antonio Ferri. All rights reserved.
+
+Holdout (2022–2026): hypothesis rejected; NCO had the lowest drawdown but a negative excess return in a high-rate period.

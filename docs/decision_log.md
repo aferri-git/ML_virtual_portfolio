@@ -59,7 +59,7 @@
 
 ## 07-11-2026 (after the holdout run)
 - Holdout run once, as planned; no changes made after seeing the results
-- Hypothesis rejected: NCO met neither success criterion (Sharpe −0.63, DSR …)
+- Hypothesis rejected: NCO met neither success criterion (Sharpe −0.63, DSR 0 with N = 8)
 - Live paper portfolio: NCO is still run live, labelled as not having passed the holdout, alongside equal weight and 60/40 as benchmarks
     x The purpose of the live stage is the data and automation infrastructure (daily data pipeline, monthly rebalancing, results store, dashboard) and an honest ongoing record, not a claim that NCO outperforms
     x No further strategies are tested on the holdout period; any new strategy would need a new pre-registration and a new holdout
