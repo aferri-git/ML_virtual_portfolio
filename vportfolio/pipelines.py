@@ -3,8 +3,8 @@
     
 # Imports
 import pandas as pd
-from vportfolio import engine,  metrics, trials
-from vportfolio.params import CAP, LOOKBACK, BACKTEST, TRIALS_LOG
+from vportfolio import engine,  metrics, trials, data
+from vportfolio.params import CAP, LOOKBACK, BACKTEST, TRIALS_LOG, RESEARCH_START, UNIVERSE, BENCHMARK, RISK_FREE
 
 # a pipeline to execute a trial on each new allocator
 ## will save the return results in a parquet file and update trials log with relevant information for the trial for future evaluation 
@@ -27,3 +27,24 @@ def trial_pipeline(name, allocator, role, data, cap=CAP, lookback=LOOKBACK, fold
     # update the logs
     trials.update_trials_log(pd.DataFrame([new_row]), trials_log)
     return new_row # return the information about the trial run
+
+# Data ingestion pipeline
+# Will return a dictionary with all data divided as per the names in data/processed
+def data_pipeline(raw):
+    prices = data.split_prices(raw)
+    universe_close = data.apply_fixes(prices["universe_close"])
+    benchmark_close = data.apply_fixes(prices["benchmark_close"])
+    universe_returns = data.make_returns(universe_close)
+    benchmark_returns = data.make_returns(benchmark_close)
+    rebuilt = data.make_rebal_dates(universe_returns.index, RESEARCH_START)
+    eligible = data.make_eligible(universe_returns)
+    rf_daily = data.make_rf_daily(prices["irx"], universe_returns.index)
+    cost_bp = data.estimate_costs(raw, UNIVERSE + BENCHMARK)
+    return {"benchmark_returns" : benchmark_returns,
+            "close" : universe_close,
+            "cost_bp" : cost_bp,
+            "eligible" : eligible,
+            "open" : prices["universe_open"],
+            "rebal_dates" : rebuilt,
+            "returns" : universe_returns,
+            "rf_daily" : rf_daily}

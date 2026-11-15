@@ -65,7 +65,7 @@ Sharpe differences of less than about 0.25 are within one standard error over 17
 ![Minimum variance vs benchmarks](figures/hrp.png)
 
 **Findings**
-The turnover of the hrp model is the highest so far. It seems that the structure of the model is working against itself; the tree reorders every month. Single linkage is sensitive: a small change in one correlation can move an ETF to a different branch, which changes the leaf order; bisection is by count, not by branch. When the order shifts, an ETF can land in a different half at the top split, and its weight is multiplied by a very different α. A tiny change in the data becomes a large jump in weight; the cap amplifies it: about 70% of the portfolio gets redistributed every month, in proportions that follow these unstable small weights
+The turnover of the hrp model is the highest so far. It seems that the structure of the model is working against itself; the tree reorders every month. Single linkage is sensitive: a small change in one correlation can move an ETF to a different branch, which changes the leaf order; bisection is by count, not by branch. When the order shifts, an ETF can land in a different half at the top split, and its weight is multiplied by a very different alpha. A tiny change in the data becomes a large jump in weight; the cap amplifies it: about 70% of the portfolio gets redistributed every month, in proportions that follow these unstable small weights
 
 
 ### Nested Clustered Optimisation (06-11-2026)

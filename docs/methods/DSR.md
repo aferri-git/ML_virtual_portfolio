@@ -68,5 +68,5 @@ The DSR is so low because it is based on how spread the sharpes are. In our tria
 
 **Conclusions**
 - Every strategy clears the luck bar with a solid margin
-- HRP is the best candidate, with a DSR of 0.96. That is just above the pre-registered treshold of 0.95. The candidates earn a genuine positive risk-adjusted return, but not a demonstrably better one than equal weight or 60/40.
+- HRP is the best candidate, with a DSR of 0.96. That is just above the pre-registered treshold of 0.95. The candidates earn a genuine positive risk-adjusted return, but not a demonstrably better one than equal weight or 60/40
 - NCO and min_var allocators are close to the bar but below it (0.91 and 0.93)
