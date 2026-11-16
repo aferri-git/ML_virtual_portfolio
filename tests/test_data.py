@@ -3,7 +3,7 @@
 # imports
 import pandas as pd
 import numpy as np
-from vportfolio.data import split_prices, apply_fixes, make_returns, make_eligible, make_rebal_dates, make_rf_daily, estimate_costs, validate_raw, save_data
+from vportfolio.data import split_prices, apply_fixes, make_returns, make_eligible, make_rebal_dates, make_rf_daily, estimate_costs, validate_raw, save_raw
 from tests.helpers import calm_fake_raw, make_fake_raw
 from vportfolio.params import BENCHMARK, RISK_FREE, RISK_FREE, UNIVERSE
 
@@ -169,18 +169,18 @@ def test_validate_raw():
         no_rate.loc[last, (field, "^IRX")] = np.nan
     assert validate_raw(no_rate, start = start) == []
 
-# save_data
-def test_save_data(tmp_path):
+# save_raw
+def test_save_raw(tmp_path):
     raw = make_fake_raw("2022-03-15")
-    path = save_data(raw, "2026-12-01", tmp_path)
+    path = save_raw(raw, "2026-12-01", tmp_path)
     # 1. always true: the file exists, in the folder we passed
     assert path.exists() and path.parent == tmp_path
     # 2. known answer: the name carries the run date, and reading it back gives the same table
     assert path.name == "yahoo_prices_2026-12-01.parquet"
     pd.testing.assert_frame_equal(pd.read_parquet(path), raw, check_freq = False)
     # 3. inputs matter: another date makes another file
-    other_path = save_data(raw, "2026-12-02", tmp_path)
+    other_path = save_raw(raw, "2026-12-02", tmp_path)
     assert other_path != path and len(list(tmp_path.iterdir())) == 2
     # 3. inputs matter: saving a different table on the same date keeps the first file
-    save_data(raw * 2, "2026-12-01", tmp_path)
+    save_raw(raw * 2, "2026-12-01", tmp_path)
     pd.testing.assert_frame_equal(pd.read_parquet(path), raw, check_freq = False)

@@ -25,6 +25,7 @@ seaborn
 
 # Added later
 tabulate
+duckdb
 # fastapi
 # uvicorn
 # pydantic
