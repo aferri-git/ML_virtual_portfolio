@@ -54,14 +54,14 @@ def data_pipeline(raw):
 def live_path(run_date, folder = LIVE_RAW):
     return folder / f"yahoo_prices_{run_date}.parquet"
 
-def download_pipeline(run_date, start = DATA_START, folder = LIVE_RAW, download = data.data_download):
+def download_pipeline(run_date, start = DATA_START, folder = LIVE_RAW, download = data.download_raw):
     path = data.live_path(run_date, folder)
     if path.exists():
         return pd.read_parquet(path)
     raw_data = download(run_date, start)
     problems = data.validate_raw(raw_data, start = start)
     if problems == []:
-        data.save_data(raw_data, run_date, folder)
+        data.save_raw(raw_data, run_date, folder)
         return raw_data
     else:
         raise ValueError(f"bad download for {run_date}: {problems}")

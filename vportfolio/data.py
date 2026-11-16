@@ -68,7 +68,7 @@ def estimate_costs(raw_data, tickers, overrides = COST_OVERRIDES):
     # threads set to false makes sure tickers are downloaded in sequence and not in parallel (less likely to be blocked by yahoo finance)
     # progress set to false hides the progress bar
     # returns a dataframe with the prices of the listed tickers
-def data_download(end, start = DATA_START, universe = UNIVERSE, benchmark = BENCHMARK, rf = RISK_FREE):
+def download_raw(end, start = DATA_START, universe = UNIVERSE, benchmark = BENCHMARK, rf = RISK_FREE):
     return yf.download(universe + benchmark + rf, start = start, end = end, auto_adjust = True, group_by = "column", threads = False, progress = False)
 
 # Validate the downloaded data
@@ -118,7 +118,7 @@ def validate_raw(raw, tickers = UNIVERSE + BENCHMARK, rf = RISK_FREE, start = DA
 def live_path(run_date, folder = LIVE_RAW):
     return folder / f"yahoo_prices_{run_date}.parquet"
 
-def save_data(raw_data, run_date, folder = LIVE_RAW):
+def save_raw(raw_data, run_date, folder = LIVE_RAW):
     folder.mkdir(parents = True, exist_ok = True)
     path = live_path(run_date, folder)
     if not path.exists():

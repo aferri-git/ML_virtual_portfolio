@@ -45,3 +45,6 @@ DATA_FIXES = [("UUP", "2007-06-20", "2007-06-19")] # (ticker, bad date, date to 
 # Introduced for the live data ingestion pipeline
 MAX_DAILY_MOVE = 0.30
 LIVE_RAW = RAW / "live"
+
+# Introduced for dattabase storing
+LIVE_DB = DATA / "live" / "portfolio.duckdb"
