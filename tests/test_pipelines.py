@@ -3,9 +3,10 @@
 
 import pandas as pd
 import numpy as np
+import pytest
 from pathlib import Path
 from vportfolio import allocators, pipelines
-from tests.helpers import make_fake_data, make_fake_raw
+from tests.helpers import make_fake_data, make_fake_raw, calm_fake_raw
 from vportfolio.params import UNIVERSE, BENCHMARK, RISK_FREE
 
 def test_trial_pipeline(tmp_path):
@@ -56,3 +57,27 @@ def test_data_pipeline():
     assert processed["eligible"].iloc[-1].all()          # everything eligible after 504 days
     # 3. inputs matter: data reaching the end of March adds March as a rebalance date
     assert len(pipelines.data_pipeline(make_fake_raw("2022-03-31"))["rebal_dates"]) == 39
+
+#download_pipeline
+def test_download_pipeline(tmp_path):
+    start = "2019-01-01" # the fake history starts in 2019, not at DATA_START
+    def clean_download(end, start):
+        return calm_fake_raw()
+    def broken_download(end, start):
+        bad = calm_fake_raw()
+        bad.loc[bad.index[-1], ("Close", "UUP")] *= 3 # last close tripled
+        return bad
+    def no_download(end, start):
+        raise RuntimeError("the download should not be called")
+    raw = pipelines.download_pipeline("2026-12-01", start, tmp_path, download = clean_download)
+    # 1. always true: the day's file is saved in the folder we passed
+    assert (tmp_path / "yahoo_prices_2026-12-01.parquet").exists()
+    # 2. known answer: a clean download comes back unchanged
+    pd.testing.assert_frame_equal(raw, calm_fake_raw())
+    # 2. known answer: a bad download raises an error and nothing is saved
+    with pytest.raises(ValueError, match = "last day move"):
+        pipelines.download_pipeline("2026-12-02", start, tmp_path, download = broken_download)
+    assert not (tmp_path / "yahoo_prices_2026-12-02.parquet").exists()
+    # 3. inputs matter: a second run on the same date reads the file and does not download again
+    again = pipelines.download_pipeline("2026-12-01", start, tmp_path, download = no_download)
+    pd.testing.assert_frame_equal(again, raw, check_freq = False)

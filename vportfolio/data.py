@@ -112,10 +112,15 @@ def validate_raw(raw, tickers = UNIVERSE + BENCHMARK, rf = RISK_FREE, start = DA
         problems.append(f"last day move above {max_move:.0%} for: {too_big}")
     return problems
 
+
 # Save the validated raw_data into a parquet file
+
+def live_path(run_date, folder = LIVE_RAW):
+    return folder / f"yahoo_prices_{run_date}.parquet"
+
 def save_data(raw_data, run_date, folder = LIVE_RAW):
     folder.mkdir(parents = True, exist_ok = True)
-    path = folder / f"yahoo_prices_{run_date}.parquet"
+    path = live_path(run_date, folder)
     if not path.exists():
         raw_data.to_parquet(path)
     return path
