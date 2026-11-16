@@ -3,22 +3,11 @@
 
 import pandas as pd
 import numpy as np
+import pytest
 from pathlib import Path
 from vportfolio import allocators, pipelines
+from tests.helpers import make_fake_data, make_fake_raw, calm_fake_raw
 from vportfolio.params import UNIVERSE, BENCHMARK, RISK_FREE
-
-# helper: a small fake data dictionary with the keys trial_pipeline expects
-# SPY rises 1% a day, AGG is flat
-def make_fake_data():
-    dates = pd.bdate_range("2020-01-01", periods=10)
-    close = pd.DataFrame({"SPY": 100 * 1.01 ** np.arange(10), "AGG": 100.0}, index=dates)
-    return {"close": close,
-            "open": close.copy(),
-            "returns": close.pct_change(fill_method=None),
-            "eligible": close.notna(),
-            "rebal_dates": pd.Series([dates[2], dates[5]]),
-            "cost_bp": pd.Series(2.0, index=close.columns),
-            "rf_daily": pd.Series(0.0, index=dates)}
 
 def test_trial_pipeline(tmp_path):
     data = make_fake_data()
@@ -26,7 +15,6 @@ def test_trial_pipeline(tmp_path):
     new_row = pipelines.trial_pipeline("test_6040", allocators.sixty_forty, "benchmark", data,
                                        cap=None, lookback=1, folder=tmp_path, trials_log=log_path)
     log = pd.read_csv(log_path)
-
     # 1. always true: one row logged, identical to the row returned, and its returns file exists
     assert len(log) == 1
     saved = log.iloc[0]
@@ -36,7 +24,6 @@ def test_trial_pipeline(tmp_path):
         else:
             assert np.isclose(saved[key], new_row[key]), key # numbers: must match up to rounding
     assert Path(new_row["returns_file"]).exists()
-
     # 2. known answer: name, allocator and settings recorded as run; SPY rises, AGG flat → positive return
     assert new_row["name"] == "test_6040"
     assert new_row["allocator"] == "sixty_forty"
@@ -51,16 +38,6 @@ def test_trial_pipeline(tmp_path):
                              cap=None, lookback=1, folder=tmp_path, trials_log=log_path)
     assert len(pd.read_csv(log_path)) == 2 # same name → replaced, not duplicated
     assert not np.isclose(other_row["ann_return"], new_row["ann_return"]) # 50/50 differs from 60/40
-
-    # helper: fake raw data shaped like the Yahoo download (Close, Open and Volume for every ticker)
-def make_fake_raw(end="2022-03-15"):
-    days = pd.bdate_range("2019-01-01", end)
-    tickers = UNIVERSE + BENCHMARK + RISK_FREE
-    rng = np.random.default_rng(0)
-    close = pd.DataFrame(rng.uniform(10, 100, (len(days), len(tickers))), index=days, columns=tickers)
-    open_ = pd.DataFrame(rng.uniform(10, 100, (len(days), len(tickers))), index=days, columns=tickers)
-    volume = pd.DataFrame(1e6, index=days, columns=tickers)
-    return pd.concat({"Close": close, "Open": open_, "Volume": volume}, axis=1)
 
 def test_data_pipeline():
     processed = pipelines.data_pipeline(make_fake_raw())
@@ -80,4 +57,27 @@ def test_data_pipeline():
     assert processed["eligible"].iloc[-1].all()          # everything eligible after 504 days
     # 3. inputs matter: data reaching the end of March adds March as a rebalance date
     assert len(pipelines.data_pipeline(make_fake_raw("2022-03-31"))["rebal_dates"]) == 39
-    
+
+#download_pipeline
+def test_download_pipeline(tmp_path):
+    start = "2019-01-01" # the fake history starts in 2019, not at DATA_START
+    def clean_download(end, start):
+        return calm_fake_raw()
+    def broken_download(end, start):
+        bad = calm_fake_raw()
+        bad.loc[bad.index[-1], ("Close", "UUP")] *= 3 # last close tripled
+        return bad
+    def no_download(end, start):
+        raise RuntimeError("the download should not be called")
+    raw = pipelines.download_pipeline("2026-12-01", start, tmp_path, download = clean_download)
+    # 1. always true: the day's file is saved in the folder we passed
+    assert (tmp_path / "yahoo_prices_2026-12-01.parquet").exists()
+    # 2. known answer: a clean download comes back unchanged
+    pd.testing.assert_frame_equal(raw, calm_fake_raw())
+    # 2. known answer: a bad download raises an error and nothing is saved
+    with pytest.raises(ValueError, match = "last day move"):
+        pipelines.download_pipeline("2026-12-02", start, tmp_path, download = broken_download)
+    assert not (tmp_path / "yahoo_prices_2026-12-02.parquet").exists()
+    # 3. inputs matter: a second run on the same date reads the file and does not download again
+    again = pipelines.download_pipeline("2026-12-01", start, tmp_path, download = no_download)
+    pd.testing.assert_frame_equal(again, raw, check_freq = False)

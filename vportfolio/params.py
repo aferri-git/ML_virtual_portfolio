@@ -41,3 +41,7 @@ HOLDOUT_START = "2021-12-31"   # first decision date: its trades happen in Janua
 DATA_START = "2003-01-01"
 COST_OVERRIDES = ["SHY", "IEF", "TLT", "AGG", "TIP", "LQD"] # forced to 2 bp
 DATA_FIXES = [("UUP", "2007-06-20", "2007-06-19")] # (ticker, bad date, date to copy from)
+
+# Introduced for the live data ingestion pipeline
+MAX_DAILY_MOVE = 0.30
+LIVE_RAW = RAW / "live"

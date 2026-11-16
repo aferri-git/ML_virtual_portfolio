@@ -68,3 +68,9 @@
 - Live rules written, see pre_registration.md → Amendments → Live paper portfolio
     x Start moved to the next month-end after deployment (1 December), not 1 October: October data was already seen in the holdout run
     x Prices stored as fetched, because Yahoo revises adjusted history after dividends
+
+## 16-11-2026
+- Data check: maximum daily move set to 30%
+    x largest one-day move in the universe since 2003 is 22.8% (EEM, 2008)
+    x a larger move in the last row stops the daily job for a manual check
+    x same limit for every ticker; a small error in a low-volatility ETF would not be caught
