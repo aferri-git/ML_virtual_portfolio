@@ -2,7 +2,8 @@
 
 # Imports
 import pandas as pd
-from vportfolio.params import UNIVERSE, BENCHMARK, RISK_FREE, DATA_FIXES, LOOKBACK, RESEARCH_START, RESEARCH_END, COST_OVERRIDES
+import yfinance as yf
+from vportfolio.params import UNIVERSE, BENCHMARK, RISK_FREE, DATA_FIXES, LOOKBACK, RESEARCH_START, RESEARCH_END, COST_OVERRIDES, MAX_DAILY_MOVE, LIVE_RAW, DATA_START
 
 # split raw data into partitions needed to run the engine
 # returns a dictionary with the raw data
@@ -12,13 +13,13 @@ def split_prices(raw):
             "universe_open" : raw["Open"][UNIVERSE].copy(),
             "benchmark_close" : raw["Close"][BENCHMARK + ["SPY"]].copy(),
             "irx" : raw["Close"][RISK_FREE[0]].copy()}
-    
+
 # apply the manual data fixes listed in params.DATA_FIXES
 # returns a copy of close with the fixes applied
 def apply_fixes(close, fixes=DATA_FIXES):
     close = close.copy()
     for ticker, bad_date, copy_from in fixes:
-        if pd.Timestamp(bad_date) in close.index and pd.Timestamp(copy_from) in close.index:
+        if ticker in close.columns and pd.Timestamp(bad_date) in close.index and pd.Timestamp(copy_from) in close.index:
             close.loc[bad_date, ticker] = close.loc[copy_from, ticker]
     return close
 
@@ -62,3 +63,59 @@ def estimate_costs(raw_data, tickers, overrides = COST_OVERRIDES):
     cost_bp = pd.cut(volume, bins=[0, 100e6, 1e9, float("inf")], labels=[10, 5, 2]).astype(int)
     cost_bp[overrides] = 2
     return cost_bp
+
+# Use yfinance libray to download them into a dataframe
+    # threads set to false makes sure tickers are downloaded in sequence and not in parallel (less likely to be blocked by yahoo finance)
+    # progress set to false hides the progress bar
+    # returns a dataframe with the prices of the listed tickers
+def data_download(end, start = DATA_START, universe = UNIVERSE, benchmark = BENCHMARK, rf = RISK_FREE):
+    return yf.download(universe + benchmark + rf, start = start, end = end, auto_adjust = True, group_by = "column", threads = False, progress = False)
+
+# Validate the downloaded data
+    # will return a list of sentences, one per problem. Empty if all is fine
+def validate_raw(raw, tickers = UNIVERSE + BENCHMARK, rf = RISK_FREE, start = DATA_START, max_move = MAX_DAILY_MOVE,
+                 fields = ("Open", "High", "Low", "Close", "Volume")):
+    # create a list of problems
+    problems = []
+    # Is every expected ticker there, for every expected field? If not, say which are missing
+    expected_cols = pd.MultiIndex.from_product([fields, tickers + rf])
+    missing_cols = expected_cols.difference(raw.columns)
+    if not missing_cols.empty:
+        problems.append(f"missing columns: {list(missing_cols)}")
+        return problems  # the checks below would crash without the columns
+    # Is the index in date order, with no date twice?
+    if not raw.index.is_monotonic_increasing:
+        problems.append("dates are not in order")
+    if not raw.index.is_unique:
+        problems.append("some dates appear twice")
+    # Does the history start where it should (the first date is not much later than start)?
+    first_date = raw.index[0]
+    if first_date > pd.Timestamp(start) + pd.Timedelta(days=7):
+        problems.append(f"history starts late: first date {first_date.date()}, expected {start}")
+    # Is the last row complete: every universe and benchmark ticker has a close and an open?
+    for field in ["Close", "Open"]:
+        last_row = raw[field][tickers].iloc[-1]
+        empty = last_row[last_row.isna()].index.tolist()
+        if empty:
+            problems.append(f"last row has no {field} for: {empty}")
+    # Are all prices above zero?
+    for field in ["Open", "High", "Low", "Close"]:
+        bad = (raw[field][tickers] <= 0).any()
+        bad_tickers = bad[bad].index.tolist()
+        if bad_tickers:
+            problems.append(f"{field} at or below zero for: {bad_tickers}")
+    # Is the last day's move believable: no ticker moved more than some limit in one day?
+    close = raw["Close"][tickers]
+    last_move = (close.iloc[-1] / close.iloc[-2] - 1).abs()
+    too_big = last_move[last_move > max_move].index.tolist()
+    if too_big:
+        problems.append(f"last day move above {max_move:.0%} for: {too_big}")
+    return problems
+
+# Save the validated raw_data into a parquet file
+def save_data(raw_data, run_date, folder = LIVE_RAW):
+    folder.mkdir(parents = True, exist_ok = True)
+    path = folder / f"yahoo_prices_{run_date}.parquet"
+    if not path.exists():
+        raw_data.to_parquet(path)
+    return path
