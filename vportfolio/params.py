@@ -48,3 +48,6 @@ LIVE_RAW = RAW / "live"
 
 # Introduced for dattabase storing
 LIVE_DB = DATA / "live" / "portfolio.duckdb"
+
+# Introduced for live paper trader
+LIVE_START = "2026-12-01"

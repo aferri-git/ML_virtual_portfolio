@@ -29,7 +29,7 @@ def trial_pipeline(name, allocator, role, data, cap=CAP, lookback=LOOKBACK, fold
     return new_row # return the information about the trial run
 
 # Data ingestion pipeline
-# Will return a dictionary with all data divided as per the names in data/processed
+## Will return a dictionary with all data divided as per the names in data/processed
 def data_pipeline(raw):
     prices = data.split_prices(raw)
     universe_close = data.apply_fixes(prices["universe_close"])
@@ -50,7 +50,7 @@ def data_pipeline(raw):
             "rf_daily" : rf_daily}
 
 # Will run the three functions and not save anything in case there is an error
-# Returns the dataframe of problems, if any, or the downloaded raw data if everything is fine
+## Returns the dataframe of problems, if any, or the downloaded raw data if everything is fine
 def live_path(run_date, folder = LIVE_RAW):
     return folder / f"yahoo_prices_{run_date}.parquet"
 

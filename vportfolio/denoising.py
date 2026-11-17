@@ -76,10 +76,10 @@ def denoise_with_ceiling(corr, ceiling):
     return denoised_corr
 
 # Join all functions together to calculate the denoised correlation matrix with the fitting methodology
-    # calculate the σ² value whose MP distribution is closest to KDE
-    # calculate the corresponding ceiling
-    # apply all the denoising steps based on the ceiling method
-    # will return a dataframe with the new denoised matrix based on fitted methodology
+    ## calculate the σ² value whose MP distribution is closest to KDE
+    ## calculate the corresponding ceiling
+    ## apply all the denoising steps based on the ceiling method
+    ## will return a dataframe with the new denoised matrix based on fitted methodology
 def denoise_corr(corr, t, bandwidth = 0.25):
     n = len(corr.columns)
     q = t / n
@@ -90,7 +90,7 @@ def denoise_corr(corr, t, bandwidth = 0.25):
 
 
 # Obtain the covariance matrix from the denoised correlation matrix and the volatilities of the returns
-    # will return a dataframe with the denoised covariance matrix
+## will return a dataframe with the denoised covariance matrix
 def denoised_cov (window):
     t = window.shape[0] # number of days in lookback window
     vols = window.std() # volatilities from the returns
@@ -100,7 +100,7 @@ def denoised_cov (window):
     return cov
 
 # detone a correlation matrix
-# will return a dataframe with the detoned correlation matrix
+## will return a dataframe with the detoned correlation matrix
 def detone_corr(corr):
     eigenvals, eigenvec = np.linalg.eigh(corr) # smallest first
     lambda_1 = eigenvals[-1] # market factor: the largest eigenvalue
