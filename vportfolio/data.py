@@ -6,7 +6,7 @@ import yfinance as yf
 from vportfolio.params import UNIVERSE, BENCHMARK, RISK_FREE, DATA_FIXES, LOOKBACK, RESEARCH_START, RESEARCH_END, COST_OVERRIDES, MAX_DAILY_MOVE, LIVE_RAW, DATA_START
 
 # split raw data into partitions needed to run the engine
-# returns a dictionary with the raw data
+## returns a dictionary with the raw data
 def split_prices(raw):
     # split the data and saves them through .copy so you can fix one without changing raw_data
     return {"universe_close" : raw["Close"][UNIVERSE].copy(),
@@ -15,7 +15,7 @@ def split_prices(raw):
             "irx" : raw["Close"][RISK_FREE[0]].copy()}
 
 # apply the manual data fixes listed in params.DATA_FIXES
-# returns a copy of close with the fixes applied
+## returns a copy of close with the fixes applied
 def apply_fixes(close, fixes=DATA_FIXES):
     close = close.copy()
     for ticker, bad_date, copy_from in fixes:
@@ -24,17 +24,17 @@ def apply_fixes(close, fixes=DATA_FIXES):
     return close
 
 # translate price data into daily returns
-# returns a dataframe with returns calculated from closing prices
+## returns a dataframe with returns calculated from closing prices
 def make_returns(close):
     return close.pct_change(fill_method=None)
 
 # apply the eligibility criteria of at least 2 years of daily returns
-# returns a dataframe with eligible returns
+## returns a dataframe with eligible returns
 def make_eligible(returns, lookback=LOOKBACK):
     return returns.notna().cumsum() >= lookback
 
 # Check last trading date of each month and regularize
-# returns a Series of rebalance dates (plain 0, 1, 2... index, like rebal_dates.parquet)
+## returns a Series of rebalance dates (plain 0, 1, 2... index, like rebal_dates.parquet)
 def make_rebal_dates(index, start, end=None):
     dates = index[index >= pd.Timestamp(start)]
     if end is not None:
@@ -49,7 +49,7 @@ def make_rebal_dates(index, start, end=None):
     return monthly
 
 # Convert the 13-week T-bill yield into a daily risk-free return on the ETF trading days
-# returns a Series named "rf"
+## returns a Series named "rf"
 def make_rf_daily(irx, index):
     rf = (irx.ffill() # fill bond-market holidays with the previous yield
           / 100 # from % to decimal
@@ -65,14 +65,14 @@ def estimate_costs(raw_data, tickers, overrides = COST_OVERRIDES):
     return cost_bp
 
 # Use yfinance libray to download them into a dataframe
-    # threads set to false makes sure tickers are downloaded in sequence and not in parallel (less likely to be blocked by yahoo finance)
-    # progress set to false hides the progress bar
-    # returns a dataframe with the prices of the listed tickers
+    ## threads set to false makes sure tickers are downloaded in sequence and not in parallel (less likely to be blocked by yahoo finance)
+    ## progress set to false hides the progress bar
+    ## returns a dataframe with the prices of the listed tickers
 def download_raw(end, start = DATA_START, universe = UNIVERSE, benchmark = BENCHMARK, rf = RISK_FREE):
     return yf.download(universe + benchmark + rf, start = start, end = end, auto_adjust = True, group_by = "column", threads = False, progress = False)
 
 # Validate the downloaded data
-    # will return a list of sentences, one per problem. Empty if all is fine
+## will return a list of sentences, one per problem. Empty if all is fine
 def validate_raw(raw, tickers = UNIVERSE + BENCHMARK, rf = RISK_FREE, start = DATA_START, max_move = MAX_DAILY_MOVE,
                  fields = ("Open", "High", "Low", "Close", "Volume")):
     # create a list of problems
@@ -112,9 +112,7 @@ def validate_raw(raw, tickers = UNIVERSE + BENCHMARK, rf = RISK_FREE, start = DA
         problems.append(f"last day move above {max_move:.0%} for: {too_big}")
     return problems
 
-
 # Save the validated raw_data into a parquet file
-
 def live_path(run_date, folder = LIVE_RAW):
     return folder / f"yahoo_prices_{run_date}.parquet"
 

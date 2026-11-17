@@ -1,13 +1,13 @@
 # Metrics Estimators
     # calculate performance metrics for a given portfolio allocation and returns data
-    
+
 # Imports
 import pandas as pd
 import numpy as np
 from scipy.stats import skew, kurtosis, norm
 
 # performance_calculator
-# returns a series with annualized returns and volatility, sharpe ratio and max drawdown
+## returns a series with annualized returns and volatility, sharpe ratio and max drawdown
 def performance_calculator (nav, rf_daily):
     # calculate daily returns
     daily_returns = nav.pct_change().dropna()
@@ -30,9 +30,9 @@ def performance_calculator (nav, rf_daily):
         "sharpe":       sharpe,
         "max_drawdown": max_drawdown,
     })
-    
+
 # calculate the PSR on given inputs
-# will return a probability between 0 and 1
+## will return a probability between 0 and 1
 def psr(nav, rf_daily, sr_threshold = 0):
     # calculate daily returns
     daily_returns = nav.pct_change(fill_method=None).dropna()
@@ -44,7 +44,7 @@ def psr(nav, rf_daily, sr_threshold = 0):
     # define additional variables (ingredients of uncertainty)
     T = len(daily_excess_returns)
     skew_ = skew(daily_excess_returns)
-    kurt_ = kurtosis(daily_excess_returns, fisher=False) 
+    kurt_ = kurtosis(daily_excess_returns, fisher=False)
     # convert annual treshold to daily
     d_tr = sr_threshold / np.sqrt(252)
     # PSR formula
@@ -53,7 +53,7 @@ def psr(nav, rf_daily, sr_threshold = 0):
     return norm.cdf(z)
 
 # Expected maximum Sharpe ratio from pure luck, given N trials
-# returns the annual Sharpe that the best of N trials would reach by chance alone (the DSR threshold)
+## returns the annual Sharpe that the best of N trials would reach by chance alone (the DSR threshold)
 def expected_max_sharpe(sharpes):
     N = len(sharpes)
     V = sharpes.var() # more spread, more likely to stand out by chance
@@ -65,7 +65,7 @@ def expected_max_sharpe(sharpes):
     return SR
 
 # Deflated Sharpe Ratio: PSR against the best Sharpe expected from luck, given all trials
-# returns the DSR
+## returns the DSR
 def dsr(nav, rf_daily, sharpes):
     sr0 = expected_max_sharpe(sharpes)
     return psr(nav, rf_daily, sr_threshold=sr0)

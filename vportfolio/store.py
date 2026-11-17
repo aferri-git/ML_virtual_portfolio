@@ -64,7 +64,7 @@ def create_tables(con):
     """)
 
 # add the rows of a dataframe to one of the live tables
-# will raise an error if a key is in the table already
+## will raise an error if a key is in the table already
 def append_rows(con, table, rows):
     con.execute(f"INSERT INTO {table} BY NAME SELECT * FROM rows")
 
@@ -80,7 +80,7 @@ def last_date(con):
     return con.execute("SELECT max(date) FROM nav").fetchone()[0] # fetchnote takes that one row out, as a tuple like
 
 # NAV of each portfolio on the latest recorded date
-# returns a dataframe with columns portfolio and nav
+## returns a dataframe with columns portfolio and nav
 def last_nav(con):
     return con.execute("""
         SELECT portfolio, nav
@@ -89,7 +89,7 @@ def last_nav(con):
     """).df()
 
 # Weights held by each portfolio at the latest recorded close
-# returns a dataframe with columns portfolio, ticker and weight
+## returns a dataframe with columns portfolio, ticker and weight
 def last_holdings(con):
     return con.execute("""
         SELECT portfolio, ticker, weight

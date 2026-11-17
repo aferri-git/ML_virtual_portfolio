@@ -5,11 +5,11 @@
     # The minimum variance allocator
     # The hierarchical risk parity allocator
     # Nested Clustered Optimisation
-    
 
-# Imports    
+
+# Imports
 import pandas as pd
-import numpy as np 
+import numpy as np
 from scipy.optimize import minimize
 from vportfolio.params import CAP
 from vportfolio import denoising, clustering
@@ -35,7 +35,7 @@ def risk_weighted(window):
     return pd.Series(weights, index = window.columns)
 
 # Minimum-variance weights for a given covariance matrix (part 2)
-# returns a Series of weights, long-only, each between 0 and the cap
+## returns a Series of weights, long-only, each between 0 and the cap
 def min_var_weights(cov, cap = CAP):
     cov_values = np.array(cov) / np.diag(cov).mean() # scaling the values depending on input
     n = cov.shape[1] # changed: number of assets, taken from the covariance (there is no window here)
@@ -52,7 +52,7 @@ def min_var_weights(cov, cap = CAP):
     return pd.Series(result.x, index=cov.columns) # changed: labels come from the covariance
 
 # Minimum variance allocator (part 1, then part 2)
-# returns a Series with the weights of the ETFs in the window
+## returns a Series with the weights of the ETFs in the window
 def min_var(window, cap = CAP, denoise = False):
     if denoise:
         cov = denoising.denoised_cov(window) # take denoised cov if set to true
@@ -60,8 +60,8 @@ def min_var(window, cap = CAP, denoise = False):
         cov = window.cov() # else take regular cov
     return min_var_weights(cov, cap) # the optimisation itself
 
-# We need to write two small wrapper functions to call the min_var function with the denoise argument set to True or False. 
-# This is needed because:
+# We need to write two small wrapper functions to call the min_var function with the denoise argument set to True or False.
+## This is needed because:
     # The engine will call the allocator without any arguments, and we need to specify whether we want to denoise or not
     # the manke_new_row will record the aallocator name with allocator.__name__ so we need to have two different functions to record the correct name
 def min_var_raw(window):
@@ -71,7 +71,7 @@ def min_var_denoised(window):
     return min_var(window, denoise=True)
 
 # Hierarchical Risk Parity (HRP) allocator
-# returns a series with the weights of the ETFs in the window, using the HRP algorithm
+## returns a series with the weights of the ETFs in the window, using the HRP algorithm
 def hrp(window):
     cov = window.cov()
     order = clustering.tree_order(window.corr())
@@ -94,7 +94,7 @@ def hrp(window):
     return w.reindex(window.columns)
 
 # Do all the math related to the NCO allocator
-# will return an optimized set of final weights
+## will return an optimized set of final weights
 def nco_weights(cov, labels):
     clusters = labels.unique()
     W = pd.DataFrame(0.0, index=cov.index, columns=clusters)
@@ -112,7 +112,7 @@ def nco_weights(cov, labels):
     return W @ between_w
 
 # Run NCO repeatedly, locking any name that goes above cap at the cap and removing it from the problem
-# returns a series of weights indexed by assets
+## returns a series of weights indexed by assets
 def nco_capped(cov, labels, cap=CAP):
     if len(cov) * cap < 1: # feasibility check
         raise ValueError(f"cap {cap} infeasible for {len(cov)} assets")
@@ -130,7 +130,7 @@ def nco_capped(cov, labels, cap=CAP):
         free = sub.index[~over]
 
 # Obtain the final nco weights after adjusting the inputs
-# will return a series with capped weights
+## will return a series with capped weights
 def nco(window, cap=CAP):
     t = window.shape[0]
     corr_dt = denoising.detone_corr(denoising.denoise_corr(window.corr(), t)) # correlation: denoise → detone
