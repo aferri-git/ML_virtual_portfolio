@@ -3,9 +3,8 @@
 # Imports
 import pandas as pd
 import numpy as np
-import duckdb
 import pytest
-from vportfolio.params import LIVE_START, CAP, LOOKBACK, RAW_FILE, TRIALS_LOG, BACKTEST
+from vportfolio.params import  CAP, LOOKBACK, RAW_FILE
 from vportfolio.live import new_days, day_kind, normal_day, decide_targets, benchmark_data, trade_day
 from vportfolio import load_data, allocators, store, pipelines, engine
 from tests import helpers
@@ -67,6 +66,7 @@ def test_normal_day():
     with pytest.raises(ValueError):
         normal_day(test_holdings, pd.Series({"A": 0.10, "B": np.nan}))
 
+@pytest.mark.skipif(not RAW_FILE.exists(), reason = "needs the local research data")
 # decide_targets
 def test_decide_targets():
     # access processed data for testing
