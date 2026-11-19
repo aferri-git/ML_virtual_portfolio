@@ -3,7 +3,7 @@
 # imports
 import pandas as pd
 import numpy as np
-from vportfolio.data import split_prices, apply_fixes, make_returns, make_eligible, make_rebal_dates, make_rf_daily, estimate_costs, validate_raw, save_raw
+from vportfolio.data import split_prices, apply_fixes, make_returns, make_eligible, make_rebal_dates, make_rf_daily, estimate_costs, validate_raw, save_raw, benchmark_data
 from tests.helpers import calm_fake_raw, make_fake_raw
 from vportfolio.params import BENCHMARK, RISK_FREE, RISK_FREE, UNIVERSE
 
@@ -184,3 +184,17 @@ def test_save_raw(tmp_path):
     # 3. inputs matter: saving a different table on the same date keeps the first file
     save_raw(raw * 2, "2026-12-01", tmp_path)
     pd.testing.assert_frame_equal(pd.read_parquet(path), raw, check_freq = False)
+
+# benchmark_data
+def test_benchmark_data():
+    fake = make_fake_raw("2022-03-15")
+    b = benchmark_data(fake)
+    # 1. always true: four tables, each with SPY and AGG only, on the raw data's dates
+    assert set(b.keys()) == {"close", "open", "returns", "eligible"}
+    for key, table in b.items():
+        assert table.columns.tolist() == ["SPY", "AGG"] and table.index.equals(fake.index), key
+    # 2. known answer: same values as the raw data; returns are the closes' daily change
+    pd.testing.assert_frame_equal(b["close"], fake["Close"][["SPY", "AGG"]])
+    assert np.isclose(b["returns"]["SPY"].iloc[1], fake["Close"]["SPY"].iloc[1] / fake["Close"]["SPY"].iloc[0] - 1)
+    # 3. inputs matter: other tickers give other columns
+    assert benchmark_data(fake, ["SPY"])["close"].columns.tolist() == ["SPY"]

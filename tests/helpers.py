@@ -3,6 +3,7 @@ import pandas as pd
 import duckdb
 from vportfolio.params import UNIVERSE, BENCHMARK, RISK_FREE
 from vportfolio.store import create_tables
+from vportfolio import pipelines, data
 
 # helper: a small fake data dictionary with the keys trial_pipeline expects
 # SPY rises 1% a day, AGG is flat
@@ -46,3 +47,13 @@ def make_store():
     con = duckdb.connect()
     create_tables(con)
     return con
+
+# fake universe and benchmark data, and two cheap test portfolios
+def make_fake_live():
+    # fake universe and benchmark data, and two cheap test portfolios
+    raw = make_fake_raw("2022-03-15")
+    processed = pipelines.data_pipeline(raw)
+    bench = data.benchmark_data(raw)
+    portfolios = {"ew": {"allocator": "equal_weights", "cap": 0.2,  "lookback": 504},
+                  "sf": {"allocator": "sixty_forty",   "cap": None, "lookback": 1}}
+    return raw, processed, bench, portfolios
