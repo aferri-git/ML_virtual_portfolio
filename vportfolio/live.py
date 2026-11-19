@@ -8,9 +8,8 @@
 
 # Imports
 import pandas as pd
-import numpy as np
-from vportfolio.params import LIVE_START, CAP, LOOKBACK
-from vportfolio import engine
+from vportfolio.params import LIVE_START, CAP, LOOKBACK, LIVE_PORTFOLIOS
+from vportfolio import engine, allocators, store
 
 # A function to compare the last date in store with the new downloaded data
 ## returns the dates still to process, in order
@@ -83,3 +82,78 @@ def trade_day(holdings, targets, overnight, intraday, cost_bp):
                            "weight_after": after[changed].values,
                            "cost": ((after - before).abs() * cost_bp.reindex(tickers) / 10000)[changed].values})
     return day_return, new_holdings, trades
+
+# helper function to build the three kinds of returns a day needs
+## returns the three values fo overnight (yesterday's close and today's open), intraday (today's open and close) and full (yesterday's and today's close)
+def day_returns(data, day):
+    close, open_ = data["close"], data["open"]
+    previous_close = close.iloc[close.index.get_loc(day) - 1]
+    overnight = open_.loc[day] / previous_close - 1
+    intraday = close.loc[day] / open_.loc[day] - 1
+    full = data["returns"].loc[day]
+    return overnight, intraday, full
+
+# Process every trading day not yet recorded, for every live portfolio
+## returns the days that were processed
+def daily_step(con, processed, bench, portfolios = LIVE_PORTFOLIOS, start = LIVE_START):
+    # 1. where each portfolio stopped
+    last = store.last_date(con) # get last date
+    navs = store.last_nav(con).set_index("portfolio")["nav"].to_dict() # get last nav
+    holdings = {name: rows.set_index("ticker")["weight"] # gets the weights into a dictionary
+                for name, rows in store.last_holdings(con).groupby("portfolio")}
+    # 2. which days are new, and what kind each one is
+    dates = processed["returns"].index
+    rebal = processed["rebal_dates"]
+    todo = new_days(dates, last, start)
+    kinds = day_kind(todo, rebal, dates)
+    portfolio_data = {}
+    for name, settings in portfolios.items():
+        if settings["allocator"] == "sixty_forty":
+            portfolio_data[name] = bench # the 60/40 runs on SPY/AGG data
+        else:
+            portfolio_data[name] = processed # everyone else runs on the universe
+    # here we start he loop of actions
+    for day in todo:
+        nav_rows, holding_rows, target_rows, trade_rows = [], [], [], []
+        # 3. every portfolio on this day
+        for name, settings in portfolios.items():
+            pdata = portfolio_data[name]
+            held = holdings.get(name, pd.Series(dtype = float))
+            nav = navs.get(name, 1.0)
+            overnight, intraday, full = day_returns(pdata, day)
+            if kinds[day] == "trade":
+                allocator = getattr(allocators, settings["allocator"])
+                decision = rebal[rebal < day].iloc[-1]
+                targets = decide_targets(allocator, pdata, decision, settings["cap"], settings["lookback"])
+                r, new_held, trades = trade_day(held, targets, overnight, intraday, processed["cost_bp"])
+                target_rows.append(pd.DataFrame({"decision_date": decision, "portfolio": name,
+                                                 "ticker": targets.index, "weight": targets.values}))
+                trade_rows.append(trades.assign(trade_date = day, portfolio = name))
+            else:
+                if held.empty:
+                    raise ValueError(f"{name} holds nothing on {day.date()}: the first live day must be a trade day")
+                r, new_held = normal_day(held, full)
+            nav = nav * (1 + r)
+            navs[name], holdings[name] = nav, new_held
+            nav_rows.append({"date": day, "portfolio": name, "nav": nav, "daily_return": r})
+            holding_rows.append(pd.DataFrame({"date": day, "portfolio": name,
+                                              "ticker": new_held.index, "weight": new_held.values}))
+
+        # 4. the returns used that day, for every ticker with a price (SPY appears in both sets, kept once)
+        used = pd.concat([processed["returns"].loc[day], bench["returns"].loc[day]])
+        used = used[~used.index.duplicated()].dropna()
+        return_rows = pd.DataFrame({"date": day, "ticker": used.index, "daily_return": used.values})
+        # 5. write the whole day at once: all tables, or none
+        con.begin()
+        try:
+            store.append_rows(con, "nav", pd.DataFrame(nav_rows))
+            store.append_rows(con, "holdings", pd.concat(holding_rows))
+            store.append_rows(con, "asset_returns", return_rows)
+            if target_rows:
+                store.append_rows(con, "targets", pd.concat(target_rows))
+                store.append_rows(con, "trades", pd.concat(trade_rows))
+            con.commit()
+        except Exception:
+            con.rollback()
+            raise
+    return todo

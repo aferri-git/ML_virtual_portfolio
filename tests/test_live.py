@@ -5,8 +5,8 @@ import pandas as pd
 import numpy as np
 import pytest
 from vportfolio.params import  CAP, LOOKBACK, RAW_FILE
-from vportfolio.live import new_days, day_kind, normal_day, decide_targets, benchmark_data, trade_day
-from vportfolio import load_data, allocators, store, pipelines, engine
+from vportfolio.live import new_days, day_kind, normal_day, decide_targets, benchmark_data, trade_day, day_returns, daily_step
+from vportfolio import load_data, allocators, pipelines, engine, live
 from tests import helpers
 
 # new_days
@@ -23,7 +23,6 @@ def test_new_days():
     assert new_days(dates, None, start = "2026-12-03")[0] == pd.Timestamp("2026-12-03")
     november = pd.bdate_range("2026-11-02", "2026-11-27")
     assert len(new_days(november, None)) == 0
-
 
 # day_kind
 def test_day_kind():
@@ -144,3 +143,55 @@ def test_trade_day():
     sold = trades_c.set_index("ticker").loc["C"]
     assert sold["weight_before"] == 0.2 and sold["weight_after"] == 0.0
     assert "C" not in h_c_new.index
+
+# day_returns
+def test_day_returns():
+    days = pd.bdate_range("2026-12-01", periods = 3)
+    close = pd.DataFrame({"A": [100.0, 110.0, 99.0]}, index = days)
+    open_ = pd.DataFrame({"A": [100.0, 105.0, 110.0]}, index = days)
+    prices = {"close": close, "open": open_, "returns": close.pct_change(fill_method = None)}
+    overnight, intraday, full = day_returns(prices, days[1])
+    # 1. always true: overnight and intraday chain into the full day: (1 + o) × (1 + i) = 1 + full
+    assert np.isclose((1 + overnight["A"]) * (1 + intraday["A"]), 1 + full["A"])
+    # 2. known answer: close 100 → open 105 is +5%; open 105 → close 110 is +4.76%; close to close +10%
+    assert np.isclose(overnight["A"], 0.05)
+    assert np.isclose(intraday["A"], 110 / 105 - 1)
+    assert np.isclose(full["A"], 0.10)
+    # 3. inputs matter: the next day uses its own previous close (110), not the first day's
+    overnight_3, _, _ = day_returns(prices, days[2])
+    assert np.isclose(overnight_3["A"], 0.0)          # close 110 → open 110
+
+# daily_step
+def test_daily_step():
+    raw, processed, bench, portfolios = helpers.make_fake_live()
+    start = "2021-06-01" # the trading day after the May 2021 month-end
+    con = helpers.make_store()
+    done = daily_step(con, processed, bench, portfolios, start)
+    navs = con.execute("SELECT * FROM nav").df()
+
+    # 1. always true: one NAV per day and portfolio; weights sum to 1 every day; a second run adds nothing
+    assert len(navs) == len(done) * 2
+    sums = con.execute("SELECT date, portfolio, sum(weight) AS total FROM holdings GROUP BY date, portfolio").df()
+    assert np.allclose(sums["total"], 1)
+    assert len(daily_step(con, processed, bench, portfolios, start)) == 0
+    assert con.execute("SELECT count(*) FROM nav").fetchone()[0] == len(navs)
+
+    # 2. known answer: the first day is a trade day; the 60/40 trades SPY and AGG and targets 0.6 / 0.4
+    first_trades = con.execute("SELECT * FROM trades WHERE trade_date = '2021-06-01' AND portfolio = 'sf'").df()
+    assert set(first_trades["ticker"]) == {"SPY", "AGG"}
+    sf_targets = con.execute("SELECT ticker, weight FROM targets WHERE portfolio = 'sf'").df()
+    assert np.allclose(sf_targets.groupby("ticker")["weight"].first().loc[["SPY", "AGG"]], [0.6, 0.4])
+
+    # 3. inputs matter: running in two parts gives the same NAVs as one run (the daily case)
+    con_parts = helpers.make_store()
+    short_raw = raw.loc[:"2021-09-15"]
+    daily_step(con_parts, pipelines.data_pipeline(short_raw), benchmark_data(short_raw), portfolios, start)
+    daily_step(con_parts, processed, bench, portfolios, start)
+    parts = con_parts.execute("SELECT * FROM nav ORDER BY date, portfolio").df()
+    pd.testing.assert_frame_equal(parts, navs.sort_values(["date", "portfolio"]).reset_index(drop = True))
+
+    # 3. inputs matter: a start that is not a trade day stops with an error and writes nothing
+    con_bad = helpers.make_store()
+    with pytest.raises(ValueError):
+        daily_step(con_bad, processed, bench, portfolios, "2021-06-02")
+    assert con_bad.execute("SELECT count(*) FROM nav").fetchone()[0] == 0

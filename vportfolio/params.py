@@ -51,3 +51,10 @@ LIVE_DB = DATA / "live" / "portfolio.duckdb"
 
 # Introduced for live paper trader
 LIVE_START = "2026-12-01"
+
+# live paper portfolios, with the settings they had in research (from the trials log)
+LIVE_PORTFOLIOS = {
+    "nco":           {"allocator": "nco",           "cap": 0.2,  "lookback": 504},
+    "equal_weights": {"allocator": "equal_weights", "cap": 0.2,  "lookback": 504},
+    "sixty_forty":   {"allocator": "sixty_forty",   "cap": None, "lookback": 1},
+}

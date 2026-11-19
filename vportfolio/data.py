@@ -122,3 +122,12 @@ def save_raw(raw_data, run_date, folder = LIVE_RAW):
     if not path.exists():
         raw_data.to_parquet(path)
     return path
+
+# Build the data set the 60/40 runs on, from a raw download
+# Returns a dictionary with close, open, returns and eligible
+def benchmark_data(raw, tickers = ["SPY", "AGG"]):
+    close = raw["Close"][tickers]
+    open_ = raw["Open"][tickers]
+    returns = close.pct_change(fill_method=None)
+    eligible = close.notna()
+    return {"close": close, "open": open_, "returns": returns, "eligible": eligible}

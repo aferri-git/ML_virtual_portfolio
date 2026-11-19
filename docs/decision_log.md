@@ -74,3 +74,13 @@
     x largest one-day move in the universe since 2003 is 22.8% (EEM, 2008)
     x a larger move in the last row stops the daily job for a manual check
     x same limit for every ticker; a small error in a low-volatility ETF would not be caught
+
+## 19-11-2026
+- Live targets are computed on the trade day, from the window ending at the decision-day close
+    x same information as deciding at the close: the window stops at the month-end
+    x no hand-over between two runs of the job, and the first day (1 December) needs no special case
+    x targets are recorded with the month-end as decision date
+    x a dividend revision between the two downloads can shift the window's prices very slightly; accepted, as for adjusted prices
+- Live engine checked against the backtest engine
+    x September 2026 (one full holding period), all three live portfolios
+    x largest NAV difference 4e-16 (rounding only): the live step reproduces the research engine

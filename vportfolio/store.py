@@ -2,11 +2,6 @@
 
 # Imports
 import duckdb
-import pandas as pd
-import tempfile
-from datetime import date
-import pytest
-from pathlib import Path
 from vportfolio.params import LIVE_DB
 
 # Create the empty tables in the database if they do not exist
@@ -65,7 +60,7 @@ def create_tables(con):
 
 # add the rows of a dataframe to one of the live tables
 ## will raise an error if a key is in the table already
-def append_rows(con, table, rows):
+def append_rows(con, table, rows): # rows here is used by SQL even thought it appears as python is not using it
     con.execute(f"INSERT INTO {table} BY NAME SELECT * FROM rows")
 
 # now we connect to the database file, creating the folder and the tables if needed
