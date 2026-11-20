@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from vportfolio.params import  CAP, LOOKBACK, RAW_FILE
 from vportfolio.live import new_days, day_kind, normal_day, decide_targets, benchmark_data, trade_day, day_returns, daily_step
-from vportfolio import load_data, allocators, pipelines, engine, live
+from vportfolio import load_data, allocators, pipelines, engine
 from tests import helpers
 
 # new_days

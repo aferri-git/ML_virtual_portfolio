@@ -46,9 +46,10 @@ def main():
                         format = "%(asctime)s %(levelname)s %(message)s")
     try:
         summary = run(args.date, Path(args.db), args.start, Path(args.raw))
-        logging.info(f"run {summary['run_date']}: {len(summary['days'])} new day(s) {summary['days']}, NAV {summary['navs']}")
+        logging.info(f"run {summary['run_date']} [{Path(args.db).name}]: "
+             f"{len(summary['days'])} new day(s) {summary['days']}, NAV {summary['navs']}")
     except Exception:
-        logging.exception(f"run {args.date} failed")
+        logging.exception(f"run {args.date} [{Path(args.db).name}] failed")
         sys.exit(1)
 
 
