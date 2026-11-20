@@ -1,4 +1,4 @@
-# Run the live paper portfolios for one day:\
+# Run the live paper portfolios for one day:
     # download
     # validate
     # save

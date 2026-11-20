@@ -1,8 +1,10 @@
 .envrc
 data/raw
 data/processed/
+data/live/
+data/dryrun/
+logs/
 __pycache__/
 .ipynb_checkpoints/
-*.egg-info/
 *.egg-info/
 results/backtest/
